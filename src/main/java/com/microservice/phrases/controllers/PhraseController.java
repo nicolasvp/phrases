@@ -24,9 +24,6 @@ public class PhraseController {
 	@Autowired
 	private IPhraseService phraseService;
 		
-	@Autowired
-	private IUserRemoteCallService loadBalancer;
-	
 	@GetMapping("/phrases")
 	public List<Phrase> index(){
 		return phraseService.findAll();
@@ -37,15 +34,8 @@ public class PhraseController {
 		return "Hi from phrases service";
 	}
 	
-	@HystrixCommand(fallbackMethod = "unavailableMessage")
 	@GetMapping("/phrases/users")
 	public String users(){
-		LOGGER.info("Invoking users service from phrase service");
-		String response = loadBalancer.getServiceRoute();
-		return response;
-	}
-		
-	public String unavailableMessage() {
-		return "Users service is not available";
+		return phraseService.callUserService();
 	}
 }

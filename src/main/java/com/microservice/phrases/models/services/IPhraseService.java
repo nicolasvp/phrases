@@ -13,4 +13,8 @@ public interface IPhraseService {
 	public Phrase save(Phrase phrase);
 	
 	public void delete(Long id);
+	
+	public String callUserService();
+	
+	public String unavailableMessage();
 }

@@ -1,6 +1,7 @@
 package com.microservice.phrases.models.services;
 
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -8,12 +9,19 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.microservice.phrases.models.dao.IPhraseDao;
 import com.microservice.phrases.models.entity.Phrase;
+import com.microservice.phrases.models.services.remote.IUserRemoteCallService;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
 @Service
 public class PhraseServiceImpl implements IPhraseService{
 
+	protected Logger LOGGER = Logger.getLogger(PhraseServiceImpl.class.getName());
+	
 	@Autowired
 	private IPhraseDao phraseDao;
+	
+	@Autowired
+	private IUserRemoteCallService loadBalancer;
 	
 	@Override
 	@Transactional(readOnly = true)
@@ -35,6 +43,19 @@ public class PhraseServiceImpl implements IPhraseService{
 	@Override
 	public void delete(Long id) {
 		phraseDao.deleteById(id);
+	}
+
+	@Override
+	@HystrixCommand(fallbackMethod = "unavailableMessage")
+	public String callUserService() {
+		LOGGER.info("Invoking users service from phrase service");
+		String response = loadBalancer.getServiceRoute();
+		return response;
+	}
+
+	@Override
+	public String unavailableMessage() {
+		return "Users service is not available";
 	}
 
 }
