@@ -30,7 +30,7 @@ public class Author implements Serializable {
 	@Size(min=1, max=100, message="debe tener entre 1 y 100 caracteres")
 	private String name;
 	
-	@Column(name="created_at", unique=true)
+	@Column(name="created_at")
 	@Temporal(TemporalType.DATE)
 	private Date createdAt;
 	
