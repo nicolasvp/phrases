@@ -2,16 +2,14 @@ package com.microservice.phrases.models.entity;
 
 import java.io.Serializable;
 import java.util.Date;
-import java.util.List;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -22,9 +20,9 @@ import javax.validation.constraints.Size;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
-@Table(name="authors")
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "phrases"})
-public class Author implements Serializable {
+@Table(name="images")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "phrase"})
+public class Image implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -37,17 +35,13 @@ public class Author implements Serializable {
 	@Size(min=1, max=100, message="debe tener entre 1 y 100 caracteres")
 	private String name;
 	
-	@OneToMany(fetch=FetchType.LAZY, mappedBy="author", cascade=CascadeType.ALL)
-	private List<Phrase> phrases;
-	
+    @OneToOne(fetch=FetchType.LAZY, mappedBy = "image")
+    private Phrase phrase;
+    
 	@Column(name="created_at")
 	@Temporal(TemporalType.DATE)
 	private Date createdAt;
 	
-	public Author() {
-		super();
-	}
-
 	// Set current date for createdAt field
 	@PrePersist
 	public void prePersist() {
@@ -70,19 +64,19 @@ public class Author implements Serializable {
 		this.name = name;
 	}
 
-	public List<Phrase> getPhrases() {
-		return phrases;
-	}
-
-	public void setPhrases(List<Phrase> phrases) {
-		this.phrases = phrases;
-	}
-
 	public Date getCreatedAt() {
 		return createdAt;
 	}
 
 	public void setCreatedAt(Date createdAt) {
 		this.createdAt = createdAt;
+	}
+
+	public Phrase getPhrase() {
+		return phrase;
+	}
+
+	public void setPhrase(Phrase phrase) {
+		this.phrase = phrase;
 	}
 }

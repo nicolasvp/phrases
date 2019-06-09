@@ -2,12 +2,16 @@ package com.microservice.phrases.models.entity;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -15,8 +19,11 @@ import javax.persistence.TemporalType;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 @Entity
 @Table(name="types")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "phrases"})
 public class Type implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -30,10 +37,17 @@ public class Type implements Serializable {
 	@Size(min=1, max=100, message="debe tener entre 1 y 100 caracteres")
 	private String name;
 	
+	@OneToMany(fetch=FetchType.LAZY, mappedBy="type", cascade=CascadeType.ALL)
+	private List<Phrase> phrases;
+	
 	@Column(name="created_at")
 	@Temporal(TemporalType.DATE)
 	private Date createdAt;
 	
+	public Type() {
+		super();
+	}
+
 	// Set current date for createdAt field
 	@PrePersist
 	public void prePersist() {
@@ -54,5 +68,21 @@ public class Type implements Serializable {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public List<Phrase> getPhrases() {
+		return phrases;
+	}
+
+	public void setPhrases(List<Phrase> phrases) {
+		this.phrases = phrases;
+	}
+
+	public Date getCreatedAt() {
+		return createdAt;
+	}
+
+	public void setCreatedAt(Date createdAt) {
+		this.createdAt = createdAt;
 	}
 }

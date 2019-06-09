@@ -22,42 +22,32 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.microservice.phrases.models.entity.Phrase;
-import com.microservice.phrases.models.services.IPhraseService;
+import com.microservice.phrases.models.entity.Type;
+import com.microservice.phrases.models.services.ITypeService;
 
 @RestController
 @RequestMapping("/api")
-public class PhraseController {
+public class TypeController {
 
-	protected Logger LOGGER = Logger.getLogger(PhraseController.class.getName());
+	protected Logger LOGGER = Logger.getLogger(TypeController.class.getName());
 	
 	@Autowired
-	private IPhraseService phraseService;
+	private ITypeService typeService;
 		
-	@GetMapping("/phrases")
-	public List<Phrase> index(){
-		List<Phrase> phrases = phraseService.findAll();
-		return phraseService.findAll();
+	@GetMapping("/types")
+	public List<Type> index(){
+		return typeService.findAll();
 	}
 	
-	@GetMapping("/service-route")
-	public String serviceRoute() {
-		return "Hi from phrases service";
-	}
 	
-	@GetMapping("/phrases/users")
-	public String users(){
-		return phraseService.callUserService();
-	}
-	
-	@GetMapping("/phrases/{id}")
+	@GetMapping("/types/{id}")
 	public ResponseEntity<?> show(@PathVariable Long id) {
 		
-		Phrase phrase = null;
+		Type type = null;
 		Map<String, Object> response = new HashMap<>();
 
 		try {
-			phrase = phraseService.findById(id);
+			type = typeService.findById(id);
 		} catch (DataAccessException e) {
 			response.put("msg", "Error al realizar la consulta en la base de datos");
 			response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
@@ -65,18 +55,18 @@ public class PhraseController {
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
 		}
 
-		if (phrase == null) {
+		if (type == null) {
 			response.put("msg", "El registro con ID: ".concat(id.toString().concat(" no existe en la base de datos")));
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
 		}
 
-		return new ResponseEntity<Phrase>(phrase, HttpStatus.OK);
+		return new ResponseEntity<Type>(type, HttpStatus.OK);
 	}
 	
-	@PostMapping("/phrases")
-	public ResponseEntity<?> create(@Valid @RequestBody Phrase phrase, BindingResult result) {
+	@PostMapping("/types")
+	public ResponseEntity<?> create(@Valid @RequestBody Type type, BindingResult result) {
 		
-		Phrase newPhrase = null;
+		Type newType = null;
 		Map<String, Object> response = new HashMap<>();
 
 		// Si no pasa la validación entonces lista los errores y los retorna
@@ -91,7 +81,7 @@ public class PhraseController {
 		}
 		
 		try {
-			newPhrase = phraseService.save(phrase);
+			newType = typeService.save(type);
 		} catch (DataAccessException e) {
 			response.put("msg", "Error al intentar guardar el registro");
 			response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
@@ -100,16 +90,16 @@ public class PhraseController {
 		}
 
 		response.put("msg", "Registro creado con éxito");
-		response.put("phrase", newPhrase);
+		response.put("type", newType);
 
 		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
 	}
 	
-	@PutMapping("/phrases/{id}")
-	public ResponseEntity<?> update(@Valid @RequestBody Phrase phrase, BindingResult result, @PathVariable("id") Long id) {
+	@PutMapping("/types/{id}")
+	public ResponseEntity<?> update(@Valid @RequestBody Type type, BindingResult result, @PathVariable("id") Long id) {
 		
-		Phrase phraseFromDB = phraseService.findById(id);
-		Phrase phraseUpdated = null;
+		Type typeFromDB = typeService.findById(id);
+		Type typeUpdated = null;
 		Map<String, Object> response = new HashMap<>();
 
 		// Si no pasa la validación entonces lista los errores y los retorna
@@ -124,16 +114,14 @@ public class PhraseController {
 		}
 		
 		// Si no se encontró el registro devuelve un error
-		if (phraseFromDB == null) {
+		if (typeFromDB == null) {
 			response.put("msg", "El registro no existe en la base de datos");
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
 		}
 
 		try {
-			phraseFromDB.setBody(phrase.getBody());
-			phraseFromDB.setAuthor(phrase.getAuthor());
-			phraseFromDB.setType(phrase.getType());
-			phraseUpdated = phraseService.save(phraseFromDB);
+			typeFromDB.setName(type.getName());
+			typeUpdated = typeService.save(typeFromDB);
 		} catch (DataAccessException e) {
 			response.put("msg", "Error al intentar actualizar el registro en la base de datos");
 			response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
@@ -141,18 +129,18 @@ public class PhraseController {
 		}
 
 		response.put("msg", "Registro actualizado con éxito");
-		response.put("phrase", phraseUpdated);
+		response.put("type", typeUpdated);
 
 		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
 	}
 	
-	@DeleteMapping("/phrases/{id}")
+	@DeleteMapping("/types/{id}")
 	public ResponseEntity<?> delete(@PathVariable("id") Long id) {
 		
 		Map<String, Object> response = new HashMap<>();
 
 		try {
-			phraseService.delete(id);
+			typeService.delete(id);
 		} catch (DataAccessException e) {
 			response.put("msg", "Error al intentar eliminar el registro en la base de datos, el registro no existe");
 			response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
