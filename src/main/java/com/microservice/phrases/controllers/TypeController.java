@@ -30,6 +30,7 @@ import com.microservice.phrases.models.services.ITypeService;
 public class TypeController {
 
 	protected Logger LOGGER = Logger.getLogger(TypeController.class.getName());
+	private static final String ERROR = "ERROR";
 	
 	@Autowired
 	private ITypeService typeService;
@@ -50,11 +51,12 @@ public class TypeController {
 			type = typeService.findById(id);
 		} catch (DataAccessException e) {
 			response.put("msg", "Error al realizar la consulta en la base de datos");
-			response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
+			response.put(ERROR, e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
 
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
 		}
 
+		// return error if the record non exist
 		if (type == null) {
 			response.put("msg", "El registro con ID: ".concat(id.toString().concat(" no existe en la base de datos")));
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
@@ -69,7 +71,7 @@ public class TypeController {
 		Type newType = null;
 		Map<String, Object> response = new HashMap<>();
 
-		// Si no pasa la validación entonces lista los errores y los retorna
+		// if validation fails, list all errors and return them
 		if(result.hasErrors()) {
 			List<String> errors = result.getFieldErrors()
 					.stream()
@@ -84,7 +86,7 @@ public class TypeController {
 			newType = typeService.save(type);
 		} catch (DataAccessException e) {
 			response.put("msg", "Error al intentar guardar el registro");
-			response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
+			response.put(ERROR, e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
 
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -102,7 +104,7 @@ public class TypeController {
 		Type typeUpdated = null;
 		Map<String, Object> response = new HashMap<>();
 
-		// Si no pasa la validación entonces lista los errores y los retorna
+		// if validation fails, list all errors and return them
 		if(result.hasErrors()) {
 			List<String> errors = result.getFieldErrors()
 					.stream()
@@ -113,7 +115,7 @@ public class TypeController {
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.BAD_REQUEST);
 		}
 		
-		// Si no se encontró el registro devuelve un error
+		// return error if the record non exist
 		if (typeFromDB == null) {
 			response.put("msg", "El registro no existe en la base de datos");
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
@@ -124,7 +126,7 @@ public class TypeController {
 			typeUpdated = typeService.save(typeFromDB);
 		} catch (DataAccessException e) {
 			response.put("msg", "Error al intentar actualizar el registro en la base de datos");
-			response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
+			response.put(ERROR, e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 
@@ -143,7 +145,7 @@ public class TypeController {
 			typeService.delete(id);
 		} catch (DataAccessException e) {
 			response.put("msg", "Error al intentar eliminar el registro en la base de datos, el registro no existe");
-			response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
+			response.put(ERROR, e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 

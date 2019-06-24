@@ -49,8 +49,7 @@ public class PhraseServiceImpl implements IPhraseService{
 	@HystrixCommand(fallbackMethod = "unavailableMessage")
 	public String callUserService() {
 		LOGGER.info("Invoking users service from phrase service");
-		String response = loadBalancer.getServiceRoute();
-		return response;
+		return loadBalancer.getServiceRoute();
 	}
 
 	@Override
