@@ -3,14 +3,17 @@ package com.microservice.phrases.controllers;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
+import com.microservice.phrases.models.services.IUtilService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -29,19 +32,21 @@ import com.microservice.phrases.models.services.ITypeService;
 @RequestMapping("/api")
 public class TypeController {
 
-	protected Logger LOGGER = Logger.getLogger(TypeController.class.getName());
-	private static final String ERROR = "ERROR";
+	protected Logger LOGGER = LoggerFactory.getLogger(TypeController.class);
 	
 	@Autowired
 	private ITypeService typeService;
-		
-	@GetMapping("/types")
+
+	@Autowired
+	private IUtilService utilService;
+
+	@GetMapping(path="/types", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<Type> index(){
 		return typeService.findAll();
 	}
 	
 	
-	@GetMapping("/types/{id}")
+	@GetMapping(path="/types/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<?> show(@PathVariable Long id) {
 		
 		Type type = null;
@@ -50,14 +55,14 @@ public class TypeController {
 		try {
 			type = typeService.findById(id);
 		} catch (DataAccessException e) {
+			LOGGER.error("Error al realizar la consulta en la base de datos: " + e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
 			response.put("msg", "Error al realizar la consulta en la base de datos");
-			response.put(ERROR, e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
-
-			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
+			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 
 		// return error if the record non exist
 		if (type == null) {
+			LOGGER.warn("El registro con ID: ".concat(id.toString().concat(" no existe en la base de datos")));
 			response.put("msg", "El registro con ID: ".concat(id.toString().concat(" no existe en la base de datos")));
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
 		}
@@ -65,7 +70,7 @@ public class TypeController {
 		return new ResponseEntity<Type>(type, HttpStatus.OK);
 	}
 	
-	@PostMapping("/types")
+	@PostMapping(path="/types", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<?> create(@Valid @RequestBody Type type, BindingResult result) {
 		
 		Type newType = null;
@@ -73,21 +78,15 @@ public class TypeController {
 
 		// if validation fails, list all errors and return them
 		if(result.hasErrors()) {
-			List<String> errors = result.getFieldErrors()
-					.stream()
-					.map(err -> "El campo " + err.getField() + " " + err.getDefaultMessage())
-					.collect(Collectors.toList());
-			
-			response.put("errors", errors);
+			response.put("errors", utilService.listErrors(result));
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.BAD_REQUEST);
 		}
 		
 		try {
 			newType = typeService.save(type);
 		} catch (DataAccessException e) {
+			LOGGER.error("Error al intentar guardar el registro: " + e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
 			response.put("msg", "Error al intentar guardar el registro");
-			response.put(ERROR, e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
-
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 
@@ -97,7 +96,7 @@ public class TypeController {
 		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
 	}
 	
-	@PutMapping("/types/{id}")
+	@PutMapping(path="/types/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<?> update(@Valid @RequestBody Type type, BindingResult result, @PathVariable("id") Long id) {
 		
 		Type typeFromDB = typeService.findById(id);
@@ -106,17 +105,13 @@ public class TypeController {
 
 		// if validation fails, list all errors and return them
 		if(result.hasErrors()) {
-			List<String> errors = result.getFieldErrors()
-					.stream()
-					.map(err -> "El campo " + err.getField() + " " + err.getDefaultMessage())
-					.collect(Collectors.toList());
-			
-			response.put("errors", errors);
+			response.put("errors", utilService.listErrors(result));
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.BAD_REQUEST);
 		}
 		
 		// return error if the record non exist
 		if (typeFromDB == null) {
+			LOGGER.warn("El registro con ID: ".concat(id.toString().concat(" no existe en la base de datos")));
 			response.put("msg", "El registro no existe en la base de datos");
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
 		}
@@ -125,8 +120,8 @@ public class TypeController {
 			typeFromDB.setName(type.getName());
 			typeUpdated = typeService.save(typeFromDB);
 		} catch (DataAccessException e) {
+			LOGGER.error("Error al intentar actualizar el registro en la base de datos: " + e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
 			response.put("msg", "Error al intentar actualizar el registro en la base de datos");
-			response.put(ERROR, e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 
@@ -136,7 +131,7 @@ public class TypeController {
 		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
 	}
 	
-	@DeleteMapping("/types/{id}")
+	@DeleteMapping(path="/types/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<?> delete(@PathVariable("id") Long id) {
 		
 		Map<String, Object> response = new HashMap<>();
@@ -144,8 +139,8 @@ public class TypeController {
 		try {
 			typeService.delete(id);
 		} catch (DataAccessException e) {
-			response.put("msg", "Error al intentar eliminar el registro en la base de datos, el registro no existe");
-			response.put(ERROR, e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
+			LOGGER.error("Error al intentar eliminar el registro de la base de datos: " + e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
+			response.put("msg", "Error al intentar eliminar el registro de la base de datos");
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 

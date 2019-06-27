@@ -3,14 +3,17 @@ package com.microservice.phrases.controllers;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
+import com.microservice.phrases.models.services.IUtilService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -29,29 +32,26 @@ import com.microservice.phrases.models.services.IPhraseService;
 @RequestMapping("/api")
 public class PhraseController {
 
-	protected Logger LOGGER = Logger.getLogger(PhraseController.class.getName());
-	private static final String ERROR = "ERROR";
+	protected Logger LOGGER = LoggerFactory.getLogger(PhraseController.class);
 	
 	@Autowired
 	private IPhraseService phraseService;
-		
-	@GetMapping("/phrases")
+
+	@Autowired
+	private IUtilService utilService;
+
+	@GetMapping(path="/phrases", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<Phrase> index(){
 		List<Phrase> phrases = phraseService.findAll();
 		return phraseService.findAll();
 	}
-	
-	@GetMapping("/service-route")
-	public String serviceRoute() {
-		return "Hi from phrases service";
-	}
-	
+
 	@GetMapping("/phrases/users")
 	public String users(){
 		return phraseService.callUserService();
 	}
 	
-	@GetMapping("/phrases/{id}")
+	@GetMapping(path="/phrases/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<?> show(@PathVariable Long id) {
 		
 		Phrase phrase = null;
@@ -60,14 +60,14 @@ public class PhraseController {
 		try {
 			phrase = phraseService.findById(id);
 		} catch (DataAccessException e) {
+			LOGGER.error("Error al realizar la consulta en la base de datos: " + e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
 			response.put("msg", "Error al realizar la consulta en la base de datos");
-			response.put(ERROR, e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
-
-			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
+			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 
 		// return error if the record non exist
 		if (phrase == null) {
+			LOGGER.warn("El registro con ID: ".concat(id.toString().concat(" no existe en la base de datos")));
 			response.put("msg", "El registro con ID: ".concat(id.toString().concat(" no existe en la base de datos")));
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
 		}
@@ -75,7 +75,7 @@ public class PhraseController {
 		return new ResponseEntity<Phrase>(phrase, HttpStatus.OK);
 	}
 	
-	@PostMapping("/phrases")
+	@PostMapping(path="/phrases", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<?> create(@Valid @RequestBody Phrase phrase, BindingResult result) {
 		
 		Phrase newPhrase = null;
@@ -83,21 +83,15 @@ public class PhraseController {
 
 		// if validation fails, list all errors and return them
 		if(result.hasErrors()) {
-			List<String> errors = result.getFieldErrors()
-					.stream()
-					.map(err -> "El campo " + err.getField() + " " + err.getDefaultMessage())
-					.collect(Collectors.toList());
-			
-			response.put("errors", errors);
+			response.put("errors", utilService.listErrors(result));
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.BAD_REQUEST);
 		}
 		
 		try {
 			newPhrase = phraseService.save(phrase);
 		} catch (DataAccessException e) {
+			LOGGER.error("Error al intentar guardar el registro: " + e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
 			response.put("msg", "Error al intentar guardar el registro");
-			response.put(ERROR, e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
-
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 
@@ -107,7 +101,7 @@ public class PhraseController {
 		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
 	}
 	
-	@PutMapping("/phrases/{id}")
+	@PutMapping(path="/phrases/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<?> update(@Valid @RequestBody Phrase phrase, BindingResult result, @PathVariable("id") Long id) {
 		
 		Phrase phraseFromDB = phraseService.findById(id);
@@ -116,17 +110,13 @@ public class PhraseController {
 
 		// if validation fails, list all errors and return them
 		if(result.hasErrors()) {
-			List<String> errors = result.getFieldErrors()
-					.stream()
-					.map(err -> "El campo " + err.getField() + " " + err.getDefaultMessage())
-					.collect(Collectors.toList());
-			
-			response.put("errors", errors);
+			response.put("errors", utilService.listErrors(result));
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.BAD_REQUEST);
 		}
 		
 		// return error if the record non exist
 		if (phraseFromDB == null) {
+			LOGGER.warn("El registro con ID: ".concat(id.toString().concat(" no existe en la base de datos")));
 			response.put("msg", "El registro no existe en la base de datos");
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
 		}
@@ -137,8 +127,8 @@ public class PhraseController {
 			phraseFromDB.setType(phrase.getType());
 			phraseUpdated = phraseService.save(phraseFromDB);
 		} catch (DataAccessException e) {
+			LOGGER.error("Error al intentar actualizar el registro en la base de datos: " + e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
 			response.put("msg", "Error al intentar actualizar el registro en la base de datos");
-			response.put(ERROR, e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 
@@ -148,7 +138,7 @@ public class PhraseController {
 		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
 	}
 	
-	@DeleteMapping("/phrases/{id}")
+	@DeleteMapping(path="/phrases/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<?> delete(@PathVariable("id") Long id) {
 		
 		Map<String, Object> response = new HashMap<>();
@@ -156,8 +146,8 @@ public class PhraseController {
 		try {
 			phraseService.delete(id);
 		} catch (DataAccessException e) {
-			response.put("msg", "Error al intentar eliminar el registro en la base de datos, el registro no existe");
-			response.put(ERROR, e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
+			LOGGER.error("Error al intentar eliminar el registro de la base de datos: " + e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
+			response.put("msg", "Error al intentar eliminar el registro de la base de datos");
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 
