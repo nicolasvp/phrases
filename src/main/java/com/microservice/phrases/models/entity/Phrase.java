@@ -24,7 +24,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
 @Table(name="phrases")
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "author"})
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Phrase implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -61,6 +61,15 @@ public class Phrase implements Serializable {
 	
 	public Phrase() {
 		super();
+	}
+
+	public Phrase(String body, Author author, Type type,Image image, Long likesCounter, Date createdAt) {
+		this.body = body;
+		this.author = author;
+		this.type = type;
+		this.image = image;
+		this.likesCounter = likesCounter;
+		this.createdAt = createdAt;
 	}
 
 	// Set current date for createdAt field

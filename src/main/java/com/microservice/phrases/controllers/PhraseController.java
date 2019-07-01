@@ -42,7 +42,6 @@ public class PhraseController {
 
 	@GetMapping(path="/phrases", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<Phrase> index(){
-		List<Phrase> phrases = phraseService.findAll();
 		return phraseService.findAll();
 	}
 
