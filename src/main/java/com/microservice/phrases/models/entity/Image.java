@@ -32,7 +32,7 @@ public class Image implements Serializable {
 	
 	@Column(unique=true)
 	@NotEmpty(message="no puede estar vacío")
-	@Size(min=1, max=100, message="debe tener entre 1 y 100 caracteres")
+	@Size(min=1, max=20, message="debe tener entre 1 y 20 caracteres")
 	private String name;
 	
     @OneToOne(fetch=FetchType.LAZY, mappedBy = "image")
@@ -41,7 +41,16 @@ public class Image implements Serializable {
 	@Column(name="created_at")
 	@Temporal(TemporalType.DATE)
 	private Date createdAt;
-	
+
+	public Image() {
+		super();
+	}
+
+	public Image(String name, Date createdAt) {
+		this.name = name;
+		this.createdAt = createdAt;
+	}
+
 	// Set current date for createdAt field
 	@PrePersist
 	public void prePersist() {

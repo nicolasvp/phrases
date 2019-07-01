@@ -48,6 +48,11 @@ public class Author implements Serializable {
 		super();
 	}
 
+	public Author(String name, Date createdAt) {
+		this.name = name;
+		this.createdAt = createdAt;
+	}
+
 	// Set current date for createdAt field
 	@PrePersist
 	public void prePersist() {
