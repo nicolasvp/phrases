@@ -27,6 +27,7 @@ import java.util.List;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -140,13 +141,11 @@ public class PhraseControllerTest {
 
     @Test
     public void show_whenRecordDoesnotExist() throws Exception {
-        when(phraseService.findById(999999L)).thenReturn(null);
-        mockMvc.perform(get("/api/phrases/{id}", 999999))
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
-                .andExpect(jsonPath("$.msg", is("El registro con ID: 999999 no existe en la base de datos")))
+        when(phraseService.findById(anyLong())).thenReturn(null);
+        mockMvc.perform(get("/api/phrases/{id}", anyLong()))
                 .andExpect(status().isNotFound());
 
-        verify(phraseService, times(1)).findById(999999L);
+        verify(phraseService, times(1)).findById(anyLong());
         verifyNoMoreInteractions(phraseService);
     }
 
@@ -155,8 +154,6 @@ public class PhraseControllerTest {
         when(phraseService.findById(1L)).thenThrow(new DataAccessException("..."){});
 
         mockMvc.perform(get("/api/phrases/{id}", 1))
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
-                .andExpect(jsonPath("$.msg", is("Error al realizar la consulta en la base de datos")))
                 .andExpect(status().isInternalServerError());
 
         verify(phraseService, times(1)).findById(1L);
@@ -226,8 +223,6 @@ public class PhraseControllerTest {
         mockMvc.perform(post("/api/phrases")
                 .content(objectMapper.writeValueAsString(phrase1))
                 .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
-                .andExpect(jsonPath("$.msg", is("Error al intentar guardar el registro")))
                 .andExpect(status().isInternalServerError());
 
         verify(phraseService, times(1)).save(any(Phrase.class));
@@ -307,10 +302,7 @@ public class PhraseControllerTest {
                 .content(objectMapper.writeValueAsString(phrase1))
                 .contentType(MediaType.APPLICATION_JSON))
                 //.andDo(print())
-                .andExpect(status().isNotFound())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
-                .andExpect(jsonPath("$.msg").exists())
-                .andExpect(jsonPath("$.msg", is("El registro no existe en la base de datos")));
+                .andExpect(status().isNotFound());
 
         verify(phraseService, times(1)).findById(anyLong());
         verifyNoMoreInteractions(phraseService);
@@ -325,8 +317,6 @@ public class PhraseControllerTest {
                 .content(objectMapper.writeValueAsString(phrase1))
                 .contentType(MediaType.APPLICATION_JSON))
                 //.andDo(print())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
-                .andExpect(jsonPath("$.msg", is("Error al intentar actualizar el registro en la base de datos")))
                 .andExpect(status().isInternalServerError());
 
         verify(phraseService, times(1)).save(any(Phrase.class));
@@ -365,8 +355,6 @@ public class PhraseControllerTest {
         mockMvc.perform(MockMvcRequestBuilders.delete("/api/phrases/{id}", anyLong())
                 .contentType(MediaType.APPLICATION_JSON))
                 //.andDo(print())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
-                .andExpect(jsonPath("$.msg", is("Error al intentar eliminar el registro de la base de datos")))
                 .andExpect(status().isInternalServerError());
 
         verify(phraseService, times(1)).delete(anyLong());

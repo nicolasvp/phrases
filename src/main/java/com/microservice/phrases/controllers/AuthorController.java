@@ -3,11 +3,12 @@ package com.microservice.phrases.controllers;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-
 import javax.validation.Valid;
-
 import com.microservice.phrases.models.services.IUtilService;
+import com.microservice.phrases.enums.DatabaseMessagesEnum;
+import com.microservice.phrases.exceptions.DatabaseAccessException;
+import com.microservice.phrases.exceptions.NullRecordException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,31 +50,26 @@ public class AuthorController {
 	
 	
 	@GetMapping(path="/authors/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<?> show(@PathVariable Long id) {
+	public ResponseEntity<?> show(@PathVariable Long id) throws NullRecordException, DatabaseAccessException {
 		
 		Author author = null;
-		Map<String, Object> response = new HashMap<>();
 
 		try {
 			author = authorService.findById(id);
 		} catch (DataAccessException e) {
-			LOGGER.error("Error al realizar la consulta en la base de datos: " + e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
-			response.put("msg", "Error al realizar la consulta en la base de datos");
-			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+			throw new DatabaseAccessException(DatabaseMessagesEnum.ACCESS_DATABASE.getMessage(), e);
 		}
 
 		// return error if the record non exist
 		if (author == null) {
-			LOGGER.warn("El registro con ID: ".concat(id.toString().concat(" no existe en la base de datos")));
-			response.put("msg", "El registro con ID: ".concat(id.toString().concat(" no existe en la base de datos")));
-			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
+			throw new NullRecordException();
 		}
 
 		return new ResponseEntity<Author>(author, HttpStatus.OK);
 	}
 	
 	@PostMapping(path="/authors", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<?> create(@Valid @RequestBody Author author, BindingResult result) {
+	public ResponseEntity<?> create(@Valid @RequestBody Author author, BindingResult result) throws DatabaseAccessException {
 		
 		Author newAuthor = null;
 		Map<String, Object> response = new HashMap<>();
@@ -87,19 +83,17 @@ public class AuthorController {
 		try {
 			newAuthor = authorService.save(author);
 		} catch (DataAccessException e) {
-			LOGGER.error("Error al intentar guardar el registro: " + e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
-			response.put("msg", "Error al intentar guardar el registro");
-			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+			throw new DatabaseAccessException(DatabaseMessagesEnum.STORE_RECORD.getMessage(), e);
 		}
 
 		response.put("msg", "Registro creado con éxito");
-		response.put("author", author);
+		response.put("author", newAuthor);
 
 		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
 	}
 	
 	@PutMapping(path="/authors/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<?> update(@Valid @RequestBody Author author, BindingResult result, @PathVariable("id") Long id) {
+	public ResponseEntity<?> update(@Valid @RequestBody Author author, BindingResult result, @PathVariable("id") Long id) throws NullRecordException, DatabaseAccessException {
 		
 		Author authorFromDB = authorService.findById(id);
 		Author authorUpdated = null;
@@ -113,18 +107,14 @@ public class AuthorController {
 		
 		// return error if the record non exist
 		if (authorFromDB == null) {
-			LOGGER.warn("El registro con ID: ".concat(id.toString().concat(" no existe en la base de datos")));
-			response.put("msg", "El registro no existe en la base de datos");
-			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
+			throw new NullRecordException();
 		}
 
 		try {
 			authorFromDB.setName(author.getName());
 			authorUpdated = authorService.save(authorFromDB);
 		} catch (DataAccessException e) {
-			LOGGER.error("Error al intentar actualizar el registro en la base de datos: " + e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
-			response.put("msg", "Error al intentar actualizar el registro en la base de datos");
-			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+			throw new DatabaseAccessException(DatabaseMessagesEnum.UPDATE_RECORD.getMessage(), e);
 		}
 
 		response.put("msg", "Registro actualizado con éxito");
@@ -134,16 +124,14 @@ public class AuthorController {
 	}
 	
 	@DeleteMapping(path="/authors/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<?> delete(@PathVariable("id") Long id) {
+	public ResponseEntity<?> delete(@PathVariable("id") Long id) throws DatabaseAccessException {
 		
 		Map<String, Object> response = new HashMap<>();
 
 		try {
 			authorService.delete(id);
 		} catch (DataAccessException e) {
-			LOGGER.error("Error al intentar eliminar el registro de la base de datos: " + e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
-			response.put("msg", "Error al intentar eliminar el registro de la base de datos");
-			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+			throw new DatabaseAccessException(DatabaseMessagesEnum.DELETE_RECORD.getMessage(), e);
 		}
 
 		response.put("msg", "Registro eliminado con éxito");

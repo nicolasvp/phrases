@@ -1,5 +1,8 @@
 package com.microservice.phrases.controllers;
 
+import com.microservice.phrases.exceptions.DatabaseAccessException;
+import com.microservice.phrases.exceptions.NullRecordException;
+import com.microservice.phrases.enums.DatabaseMessagesEnum;
 import com.microservice.phrases.models.entity.Image;
 import com.microservice.phrases.models.services.IImageService;
 import com.microservice.phrases.models.services.IUtilService;
@@ -37,31 +40,26 @@ public class ImageController {
     }
 
     @GetMapping(path="/images/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> show(@PathVariable Long id) {
+    public ResponseEntity<?> show(@PathVariable Long id) throws NullRecordException, DatabaseAccessException {
 
         Image image = null;
-        Map<String, Object> response = new HashMap<>();
 
         try {
             image = imageService.findById(id);
         } catch (DataAccessException e) {
-            LOGGER.error("Error al realizar la consulta en la base de datos: " + e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
-            response.put("msg", "Error al realizar la consulta en la base de datos");
-            return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        	throw new DatabaseAccessException(DatabaseMessagesEnum.ACCESS_DATABASE.getMessage(), e);
         }
 
         // return error if the record non exist
         if (image == null) {
-            LOGGER.warn("El registro con ID: ".concat(id.toString().concat(" no existe en la base de datos")));
-            response.put("msg", "El registro con ID: ".concat(id.toString().concat(" no existe en la base de datos")));
-            return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
+        	throw new NullRecordException();
         }
 
         return new ResponseEntity<Image>(image, HttpStatus.OK);
     }
 
     @PostMapping(path="/images", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> create(@Valid @RequestBody Image image, BindingResult result) {
+    public ResponseEntity<?> create(@Valid @RequestBody Image image, BindingResult result) throws DatabaseAccessException {
 
         Image newImage = null;
         Map<String, Object> response = new HashMap<>();
@@ -75,9 +73,7 @@ public class ImageController {
         try {
             newImage = imageService.save(image);
         } catch (DataAccessException e) {
-            LOGGER.error("Error al intentar guardar el registro: " + e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
-            response.put("msg", "Error al intentar guardar el registro");
-            return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        	throw new DatabaseAccessException(DatabaseMessagesEnum.STORE_RECORD.getMessage(), e);
         }
 
         response.put("msg", "Registro creado con éxito");
@@ -87,7 +83,7 @@ public class ImageController {
     }
 
     @PutMapping(path="/images/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> update(@Valid @RequestBody Image image, BindingResult result, @PathVariable("id") Long id) {
+    public ResponseEntity<?> update(@Valid @RequestBody Image image, BindingResult result, @PathVariable("id") Long id) throws NullRecordException, DatabaseAccessException {
 
         Image imageFromDB = imageService.findById(id);
         Image imageUpdated = null;
@@ -101,18 +97,14 @@ public class ImageController {
 
         // return error if the record non exist
         if (imageFromDB == null) {
-            LOGGER.warn("El registro con ID: ".concat(id.toString().concat(" no existe en la base de datos")));
-            response.put("msg", "El registro no existe en la base de datos");
-            return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
+        	throw new NullRecordException();
         }
 
         try {
             imageFromDB.setName(image.getName());
             imageUpdated = imageService.save(imageFromDB);
         } catch (DataAccessException e) {
-            LOGGER.error("Error al intentar actualizar el registro en la base de datos: " + e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
-            response.put("msg", "Error al intentar actualizar el registro en la base de datos");
-            return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        	throw new DatabaseAccessException(DatabaseMessagesEnum.UPDATE_RECORD.getMessage(), e);
         }
 
         response.put("msg", "Registro actualizado con éxito");
@@ -122,16 +114,14 @@ public class ImageController {
     }
 
     @DeleteMapping(path="/images/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> delete(@PathVariable("id") Long id) {
+    public ResponseEntity<?> delete(@PathVariable("id") Long id) throws DatabaseAccessException {
 
         Map<String, Object> response = new HashMap<>();
 
         try {
             imageService.delete(id);
         } catch (DataAccessException e) {
-            LOGGER.error("Error al intentar eliminar el registro de la base de datos: " + e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
-            response.put("msg", "Error al intentar eliminar el registro de la base de datos");
-            return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        	throw new DatabaseAccessException(DatabaseMessagesEnum.DELETE_RECORD.getMessage(), e);
         }
 
         response.put("msg", "Registro eliminado con éxito");

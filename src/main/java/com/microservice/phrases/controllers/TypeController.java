@@ -26,6 +26,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.microservice.phrases.enums.DatabaseMessagesEnum;
+import com.microservice.phrases.exceptions.DatabaseAccessException;
+import com.microservice.phrases.exceptions.NullRecordException;
 import com.microservice.phrases.models.entity.Type;
 import com.microservice.phrases.models.services.ITypeService;
 
@@ -49,7 +52,7 @@ public class TypeController {
 	
 	
 	@GetMapping(path="/types/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<?> show(@PathVariable Long id) {
+	public ResponseEntity<?> show(@PathVariable Long id) throws NullRecordException, DatabaseAccessException {
 		
 		Type type = null;
 		Map<String, Object> response = new HashMap<>();
@@ -57,23 +60,19 @@ public class TypeController {
 		try {
 			type = typeService.findById(id);
 		} catch (DataAccessException e) {
-			LOGGER.error("Error al realizar la consulta en la base de datos: " + e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
-			response.put("msg", "Error al realizar la consulta en la base de datos");
-			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+			throw new DatabaseAccessException(DatabaseMessagesEnum.ACCESS_DATABASE.getMessage(), e);
 		}
 
 		// return error if the record non exist
 		if (type == null) {
-			LOGGER.warn("El registro con ID: ".concat(id.toString().concat(" no existe en la base de datos")));
-			response.put("msg", "El registro con ID: ".concat(id.toString().concat(" no existe en la base de datos")));
-			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
+			throw new NullRecordException();
 		}
 
 		return new ResponseEntity<Type>(type, HttpStatus.OK);
 	}
 	
 	@PostMapping(path="/types", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<?> create(@Valid @RequestBody Type type, BindingResult result) {
+	public ResponseEntity<?> create(@Valid @RequestBody Type type, BindingResult result) throws DatabaseAccessException {
 		
 		Type newType = null;
 		Map<String, Object> response = new HashMap<>();
@@ -87,9 +86,7 @@ public class TypeController {
 		try {
 			newType = typeService.save(type);
 		} catch (DataAccessException e) {
-			LOGGER.error("Error al intentar guardar el registro: " + e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
-			response.put("msg", "Error al intentar guardar el registro");
-			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+			throw new DatabaseAccessException(DatabaseMessagesEnum.STORE_RECORD.getMessage(), e);
 		}
 
 		response.put("msg", "Registro creado con éxito");
@@ -99,7 +96,7 @@ public class TypeController {
 	}
 	
 	@PutMapping(path="/types/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<?> update(@Valid @RequestBody Type type, BindingResult result, @PathVariable("id") Long id) {
+	public ResponseEntity<?> update(@Valid @RequestBody Type type, BindingResult result, @PathVariable("id") Long id) throws NullRecordException, DatabaseAccessException {
 		
 		Type typeFromDB = typeService.findById(id);
 		Type typeUpdated = null;
@@ -113,18 +110,14 @@ public class TypeController {
 		
 		// return error if the record non exist
 		if (typeFromDB == null) {
-			LOGGER.warn("El registro con ID: ".concat(id.toString().concat(" no existe en la base de datos")));
-			response.put("msg", "El registro no existe en la base de datos");
-			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
+			throw new NullRecordException();
 		}
 
 		try {
 			typeFromDB.setName(type.getName());
 			typeUpdated = typeService.save(typeFromDB);
 		} catch (DataAccessException e) {
-			LOGGER.error("Error al intentar actualizar el registro en la base de datos: " + e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
-			response.put("msg", "Error al intentar actualizar el registro en la base de datos");
-			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+			throw new DatabaseAccessException(DatabaseMessagesEnum.UPDATE_RECORD.getMessage(), e);
 		}
 
 		response.put("msg", "Registro actualizado con éxito");
@@ -134,16 +127,14 @@ public class TypeController {
 	}
 	
 	@DeleteMapping(path="/types/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<?> delete(@PathVariable("id") Long id) {
+	public ResponseEntity<?> delete(@PathVariable("id") Long id) throws DatabaseAccessException {
 		
 		Map<String, Object> response = new HashMap<>();
 
 		try {
 			typeService.delete(id);
 		} catch (DataAccessException e) {
-			LOGGER.error("Error al intentar eliminar el registro de la base de datos: " + e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
-			response.put("msg", "Error al intentar eliminar el registro de la base de datos");
-			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+			throw new DatabaseAccessException(DatabaseMessagesEnum.DELETE_RECORD.getMessage(), e);
 		}
 
 		response.put("msg", "Registro eliminado con éxito");
