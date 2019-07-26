@@ -1,6 +1,7 @@
 package com.microservice.phrases.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.microservice.phrases.config.MessagesTranslate;
 import com.microservice.phrases.models.entity.Author;
 import com.microservice.phrases.models.entity.Image;
 import com.microservice.phrases.models.entity.Phrase;
@@ -12,6 +13,7 @@ import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -53,6 +55,9 @@ public class PhraseControllerTest {
     @InjectMocks
     private PhraseController phraseController;
 
+	@Autowired
+	private MessagesTranslate messages;
+	
     private List<Phrase> dummyPhrases;
 
     private List<String> invalidParamsMessages = new ArrayList<>();
@@ -177,7 +182,7 @@ public class PhraseControllerTest {
                 .andExpect(jsonPath("$.phrase").exists())
                 .andExpect(jsonPath("$.phrase.body", is("phrase1")))
                 .andExpect(jsonPath("$.msg").exists())
-                .andExpect(jsonPath("$.msg", is("Registro creado con éxito")));
+                .andExpect(jsonPath("$.msg", is(messages.getCreated())));
 
         verify(phraseService, times(1)).save(any(Phrase.class));
         verifyNoMoreInteractions(phraseService);
@@ -246,7 +251,7 @@ public class PhraseControllerTest {
                 .andExpect(jsonPath("$.phrase").exists())
                 .andExpect(jsonPath("$.phrase.body", is("phrase1")))
                 .andExpect(jsonPath("$.msg").exists())
-                .andExpect(jsonPath("$.msg", is("Registro actualizado con éxito")));
+                .andExpect(jsonPath("$.msg", is(messages.getUpdated())));
 
         verify(phraseService, times(1)).findById(anyLong());
         verify(phraseService, times(1)).save(any(Phrase.class));
@@ -335,7 +340,7 @@ public class PhraseControllerTest {
         mockMvc.perform(MockMvcRequestBuilders.delete("/api/phrases/{id}", 1))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.msg").exists())
-                .andExpect(jsonPath("$.msg", is("Registro eliminado con éxito")));
+                .andExpect(jsonPath("$.msg", is(messages.getDeleted())));
 
         verify(phraseService, times(1)).delete(anyLong());
         verifyNoMoreInteractions(phraseService);

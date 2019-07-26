@@ -1,6 +1,7 @@
 package com.microservice.phrases.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.microservice.phrases.config.MessagesTranslate;
 import com.microservice.phrases.models.entity.Type;
 import com.microservice.phrases.models.services.ITypeService;
 import com.microservice.phrases.models.services.IUtilService;
@@ -9,6 +10,7 @@ import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -48,6 +50,9 @@ public class TypeControllerTest {
     @InjectMocks
     private TypeController typeController;
 
+	@Autowired
+	private MessagesTranslate messages;
+	
     private List<Type> dummyTypes;
 
     private List<String> invalidParamsMessages = new ArrayList<>();
@@ -168,7 +173,7 @@ public class TypeControllerTest {
                 .andExpect(jsonPath("$.type").exists())
                 .andExpect(jsonPath("$.type.name", is("TYPE1")))
                 .andExpect(jsonPath("$.msg").exists())
-                .andExpect(jsonPath("$.msg", is("Registro creado con éxito")));
+                .andExpect(jsonPath("$.msg", is(messages.getCreated())));
 
         verify(typeService, times(1)).save(any(Type.class));
         verifyNoMoreInteractions(typeService);
@@ -234,7 +239,7 @@ public class TypeControllerTest {
                 .andExpect(jsonPath("$.type").exists())
                 .andExpect(jsonPath("$.type.name", is("TYPE1")))
                 .andExpect(jsonPath("$.msg").exists())
-                .andExpect(jsonPath("$.msg", is("Registro actualizado con éxito")));
+                .andExpect(jsonPath("$.msg", is(messages.getUpdated())));
 
         verify(typeService, times(1)).findById(anyLong());
         verify(typeService, times(1)).save(any(Type.class));
@@ -320,7 +325,7 @@ public class TypeControllerTest {
         mockMvc.perform(MockMvcRequestBuilders.delete("/api/types/{id}", 1))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.msg").exists())
-                .andExpect(jsonPath("$.msg", is("Registro eliminado con éxito")));
+                .andExpect(jsonPath("$.msg", is(messages.getDeleted())));
 
         verify(typeService, times(1)).delete(anyLong());
         verifyNoMoreInteractions(typeService);

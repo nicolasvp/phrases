@@ -1,6 +1,7 @@
 package com.microservice.phrases.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.microservice.phrases.config.MessagesTranslate;
 import com.microservice.phrases.models.entity.Author;
 import com.microservice.phrases.models.services.IAuthorService;
 import com.microservice.phrases.models.services.IUtilService;
@@ -9,6 +10,7 @@ import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -46,6 +48,9 @@ public class AuthorControllerTest {
     @InjectMocks
     private AuthorController authorController;
 
+	@Autowired
+	private MessagesTranslate messages;
+	
     private List<Author> dummyAuthors;
 
     private List<String> invalidParamsMessages = new ArrayList<>();
@@ -166,7 +171,7 @@ public class AuthorControllerTest {
                 .andExpect(jsonPath("$.author").exists())
                 .andExpect(jsonPath("$.author.name", is("AUTHOR1")))
                 .andExpect(jsonPath("$.msg").exists())
-                .andExpect(jsonPath("$.msg", is("Registro creado con éxito")));
+                .andExpect(jsonPath("$.msg", is(messages.getCreated())));
 
         verify(authorService, times(1)).save(any(Author.class));
         verifyNoMoreInteractions(authorService);
@@ -232,7 +237,7 @@ public class AuthorControllerTest {
                 .andExpect(jsonPath("$.author").exists())
                 .andExpect(jsonPath("$.author.name", is("AUTHOR1")))
                 .andExpect(jsonPath("$.msg").exists())
-                .andExpect(jsonPath("$.msg", is("Registro actualizado con éxito")));
+                .andExpect(jsonPath("$.msg", is(messages.getUpdated())));
 
         verify(authorService, times(1)).findById(anyLong());
         verify(authorService, times(1)).save(any(Author.class));
@@ -318,7 +323,7 @@ public class AuthorControllerTest {
         mockMvc.perform(MockMvcRequestBuilders.delete("/api/authors/{id}", 1))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.msg").exists())
-                .andExpect(jsonPath("$.msg", is("Registro eliminado con éxito")));
+                .andExpect(jsonPath("$.msg", is(messages.getDeleted())));
 
         verify(authorService, times(1)).delete(anyLong());
         verifyNoMoreInteractions(authorService);

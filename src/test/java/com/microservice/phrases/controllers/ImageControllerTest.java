@@ -1,6 +1,7 @@
 package com.microservice.phrases.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.microservice.phrases.config.MessagesTranslate;
 import com.microservice.phrases.models.entity.Image;
 import com.microservice.phrases.models.entity.Type;
 import com.microservice.phrases.models.services.IImageService;
@@ -10,6 +11,7 @@ import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -49,6 +51,9 @@ public class ImageControllerTest {
     @InjectMocks
     private ImageController imageController;
 
+	@Autowired
+	private MessagesTranslate messages;
+	
     private List<Image> dummyImages;
 
     private List<String> invalidParamsMessages = new ArrayList<>();
@@ -169,7 +174,7 @@ public class ImageControllerTest {
                 .andExpect(jsonPath("$.image").exists())
                 .andExpect(jsonPath("$.image.name", is("IMAGE1")))
                 .andExpect(jsonPath("$.msg").exists())
-                .andExpect(jsonPath("$.msg", is("Registro creado con éxito")));
+                .andExpect(jsonPath("$.msg", is(messages.getCreated())));
 
         verify(imageService, times(1)).save(any(Image.class));
         verifyNoMoreInteractions(imageService);
@@ -235,7 +240,7 @@ public class ImageControllerTest {
                 .andExpect(jsonPath("$.image").exists())
                 .andExpect(jsonPath("$.image.name", is("IMAGE1")))
                 .andExpect(jsonPath("$.msg").exists())
-                .andExpect(jsonPath("$.msg", is("Registro actualizado con éxito")));
+                .andExpect(jsonPath("$.msg", is(messages.getUpdated())));
 
         verify(imageService, times(1)).findById(anyLong());
         verify(imageService, times(1)).save(any(Image.class));
@@ -321,7 +326,7 @@ public class ImageControllerTest {
         mockMvc.perform(MockMvcRequestBuilders.delete("/api/images/{id}", 1))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.msg").exists())
-                .andExpect(jsonPath("$.msg", is("Registro eliminado con éxito")));
+                .andExpect(jsonPath("$.msg", is(messages.getDeleted())));
 
         verify(imageService, times(1)).delete(anyLong());
         verifyNoMoreInteractions(imageService);

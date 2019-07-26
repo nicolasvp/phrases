@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.microservice.phrases.config.MessagesTranslate;
 import com.microservice.phrases.enums.DatabaseMessagesEnum;
 import com.microservice.phrases.exceptions.DatabaseAccessException;
 import com.microservice.phrases.exceptions.NullRecordException;
@@ -45,17 +46,18 @@ public class TypeController {
 	@Autowired
 	private IUtilService utilService;
 
+	@Autowired
+	private MessagesTranslate messages;
+	
 	@GetMapping(path="/types", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<Type> index(){
 		return typeService.findAll();
 	}
 	
-	
 	@GetMapping(path="/types/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<?> show(@PathVariable Long id) throws NullRecordException, DatabaseAccessException {
 		
 		Type type = null;
-		Map<String, Object> response = new HashMap<>();
 
 		try {
 			type = typeService.findById(id);
@@ -89,7 +91,7 @@ public class TypeController {
 			throw new DatabaseAccessException(DatabaseMessagesEnum.STORE_RECORD.getMessage(), e);
 		}
 
-		response.put("msg", "Registro creado con éxito");
+		response.put("msg", messages.getCreated());
 		response.put("type", newType);
 
 		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
@@ -120,7 +122,7 @@ public class TypeController {
 			throw new DatabaseAccessException(DatabaseMessagesEnum.UPDATE_RECORD.getMessage(), e);
 		}
 
-		response.put("msg", "Registro actualizado con éxito");
+		response.put("msg", messages.getUpdated());
 		response.put("type", typeUpdated);
 
 		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
@@ -137,7 +139,7 @@ public class TypeController {
 			throw new DatabaseAccessException(DatabaseMessagesEnum.DELETE_RECORD.getMessage(), e);
 		}
 
-		response.put("msg", "Registro eliminado con éxito");
+		response.put("msg", messages.getDeleted());
 
 		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
 	}

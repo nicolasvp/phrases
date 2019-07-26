@@ -4,7 +4,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.validation.Valid;
+
 import com.microservice.phrases.models.services.IUtilService;
+import com.microservice.phrases.config.MessagesTranslate;
 import com.microservice.phrases.enums.DatabaseMessagesEnum;
 import com.microservice.phrases.exceptions.DatabaseAccessException;
 import com.microservice.phrases.exceptions.NullRecordException;
@@ -43,11 +45,13 @@ public class AuthorController {
 	@Autowired
 	private IUtilService utilService;
 
+	@Autowired
+	private MessagesTranslate messages;
+
 	@GetMapping(path="/authors", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<Author> index(){
 		return authorService.findAll();
 	}
-	
 	
 	@GetMapping(path="/authors/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<?> show(@PathVariable Long id) throws NullRecordException, DatabaseAccessException {
@@ -86,7 +90,7 @@ public class AuthorController {
 			throw new DatabaseAccessException(DatabaseMessagesEnum.STORE_RECORD.getMessage(), e);
 		}
 
-		response.put("msg", "Registro creado con éxito");
+		response.put("msg", messages.getCreated());
 		response.put("author", newAuthor);
 
 		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
@@ -117,7 +121,7 @@ public class AuthorController {
 			throw new DatabaseAccessException(DatabaseMessagesEnum.UPDATE_RECORD.getMessage(), e);
 		}
 
-		response.put("msg", "Registro actualizado con éxito");
+		response.put("msg", messages.getUpdated());
 		response.put("author", authorUpdated);
 
 		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
@@ -134,7 +138,7 @@ public class AuthorController {
 			throw new DatabaseAccessException(DatabaseMessagesEnum.DELETE_RECORD.getMessage(), e);
 		}
 
-		response.put("msg", "Registro eliminado con éxito");
+		response.put("msg", messages.getDeleted());
 
 		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
 	}
