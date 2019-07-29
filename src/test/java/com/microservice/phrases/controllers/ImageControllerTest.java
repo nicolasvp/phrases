@@ -1,7 +1,7 @@
 package com.microservice.phrases.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.microservice.phrases.config.MessagesTranslate;
+import com.microservice.phrases.enums.CrudMessagesEnum;
 import com.microservice.phrases.models.entity.Image;
 import com.microservice.phrases.models.entity.Type;
 import com.microservice.phrases.models.services.IImageService;
@@ -11,7 +11,6 @@ import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -28,7 +27,6 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -51,9 +49,6 @@ public class ImageControllerTest {
     @InjectMocks
     private ImageController imageController;
 
-	@Autowired
-	private MessagesTranslate messages;
-	
     private List<Image> dummyImages;
 
     private List<String> invalidParamsMessages = new ArrayList<>();
@@ -94,11 +89,11 @@ public class ImageControllerTest {
     }
 
     private void setInvalidImageParamsMessages() {
-        invalidParamsMessages.add("El campo name debe tener entre 1 y 20 caracteres");
+        invalidParamsMessages.add("The name field must have between 1 and 20 characters");
     }
 
     private void setEmptyImageMessages() {
-        emptyImageMessages.add("El campo name no puede estar vacío");
+        emptyImageMessages.add("The name field can't be empty");
     }
 
     @Test
@@ -165,7 +160,7 @@ public class ImageControllerTest {
     @Test
     public void create_withProperImage() throws Exception {
         when(imageService.save(any(Image.class))).thenReturn(image1);
-
+        
         mockMvc.perform(post("/api/images")
                 .content(objectMapper.writeValueAsString(image1))
                 .contentType(MediaType.APPLICATION_JSON))
@@ -174,7 +169,7 @@ public class ImageControllerTest {
                 .andExpect(jsonPath("$.image").exists())
                 .andExpect(jsonPath("$.image.name", is("IMAGE1")))
                 .andExpect(jsonPath("$.msg").exists())
-                .andExpect(jsonPath("$.msg", is(messages.getCreated())));
+                .andExpect(jsonPath("$.msg", is(CrudMessagesEnum.CREATED.getMessage())));
 
         verify(imageService, times(1)).save(any(Image.class));
         verifyNoMoreInteractions(imageService);
@@ -192,7 +187,7 @@ public class ImageControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(jsonPath("$.errors").exists())
                 .andExpect(jsonPath("$.errors", hasSize(1)))
-                .andExpect(jsonPath("$.errors", hasItem("El campo name no puede estar vacío")));
+                .andExpect(jsonPath("$.errors", hasItem("The name field can't be empty")));
     }
 
     @Test
@@ -207,7 +202,7 @@ public class ImageControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(jsonPath("$.errors").exists())
                 .andExpect(jsonPath("$.errors", hasSize(1)))
-                .andExpect(jsonPath("$.errors", hasItem("El campo name debe tener entre 1 y 20 caracteres")));
+                .andExpect(jsonPath("$.errors", hasItem("The name field must have between 1 and 20 characters")));
     }
 
     @Test
@@ -231,7 +226,7 @@ public class ImageControllerTest {
     public void update_withProperImageAndId() throws Exception {
         when(imageService.findById(anyLong())).thenReturn(image1);
         when(imageService.save(any(Image.class))).thenReturn(image1);
-
+        
         mockMvc.perform(put("/api/images/{id}", 1)
                 .content(objectMapper.writeValueAsString(image1))
                 .contentType(MediaType.APPLICATION_JSON))
@@ -240,7 +235,7 @@ public class ImageControllerTest {
                 .andExpect(jsonPath("$.image").exists())
                 .andExpect(jsonPath("$.image.name", is("IMAGE1")))
                 .andExpect(jsonPath("$.msg").exists())
-                .andExpect(jsonPath("$.msg", is(messages.getUpdated())));
+                .andExpect(jsonPath("$.msg", is(CrudMessagesEnum.UPDATED.getMessage())));
 
         verify(imageService, times(1)).findById(anyLong());
         verify(imageService, times(1)).save(any(Image.class));
@@ -267,7 +262,7 @@ public class ImageControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(jsonPath("$.errors").exists())
                 .andExpect(jsonPath("$.errors", hasSize(1)))
-                .andExpect(jsonPath("$.errors", hasItem("El campo name no puede estar vacío")));
+                .andExpect(jsonPath("$.errors", hasItem("The name field can't be empty")));
     }
 
     @Test
@@ -282,7 +277,7 @@ public class ImageControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(jsonPath("$.errors").exists())
                 .andExpect(jsonPath("$.errors", hasSize(1)))
-                .andExpect(jsonPath("$.errors", hasItem("El campo name debe tener entre 1 y 20 caracteres")));
+                .andExpect(jsonPath("$.errors", hasItem("The name field must have between 1 and 20 characters")));
     }
 
     @Test
@@ -322,11 +317,11 @@ public class ImageControllerTest {
     @Test
     public void delete_withProperId() throws Exception {
         doNothing().when(imageService).delete(anyLong());
-
+        
         mockMvc.perform(MockMvcRequestBuilders.delete("/api/images/{id}", 1))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.msg").exists())
-                .andExpect(jsonPath("$.msg", is(messages.getDeleted())));
+                .andExpect(jsonPath("$.msg", is(CrudMessagesEnum.DELETED.getMessage())));
 
         verify(imageService, times(1)).delete(anyLong());
         verifyNoMoreInteractions(imageService);

@@ -4,13 +4,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.validation.Valid;
-
 import com.microservice.phrases.models.services.IUtilService;
-import com.microservice.phrases.config.MessagesTranslate;
+import com.microservice.phrases.enums.CrudMessagesEnum;
 import com.microservice.phrases.enums.DatabaseMessagesEnum;
 import com.microservice.phrases.exceptions.DatabaseAccessException;
 import com.microservice.phrases.exceptions.NullRecordException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,9 +42,6 @@ public class AuthorController {
 
 	@Autowired
 	private IUtilService utilService;
-
-	@Autowired
-	private MessagesTranslate messages;
 
 	@GetMapping(path="/authors", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<Author> index(){
@@ -90,7 +85,7 @@ public class AuthorController {
 			throw new DatabaseAccessException(DatabaseMessagesEnum.STORE_RECORD.getMessage(), e);
 		}
 
-		response.put("msg", messages.getCreated());
+		response.put("msg", CrudMessagesEnum.CREATED.getMessage());
 		response.put("author", newAuthor);
 
 		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
@@ -121,7 +116,7 @@ public class AuthorController {
 			throw new DatabaseAccessException(DatabaseMessagesEnum.UPDATE_RECORD.getMessage(), e);
 		}
 
-		response.put("msg", messages.getUpdated());
+		response.put("msg", CrudMessagesEnum.UPDATED.getMessage());
 		response.put("author", authorUpdated);
 
 		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
@@ -138,7 +133,7 @@ public class AuthorController {
 			throw new DatabaseAccessException(DatabaseMessagesEnum.DELETE_RECORD.getMessage(), e);
 		}
 
-		response.put("msg", messages.getDeleted());
+		response.put("msg", CrudMessagesEnum.DELETED.getMessage());
 
 		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
 	}

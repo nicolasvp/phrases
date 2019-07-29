@@ -1,7 +1,7 @@
 package com.microservice.phrases.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.microservice.phrases.config.MessagesTranslate;
+import com.microservice.phrases.enums.CrudMessagesEnum;
 import com.microservice.phrases.models.entity.Type;
 import com.microservice.phrases.models.services.ITypeService;
 import com.microservice.phrases.models.services.IUtilService;
@@ -10,7 +10,6 @@ import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -27,7 +26,6 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -50,9 +48,6 @@ public class TypeControllerTest {
     @InjectMocks
     private TypeController typeController;
 
-	@Autowired
-	private MessagesTranslate messages;
-	
     private List<Type> dummyTypes;
 
     private List<String> invalidParamsMessages = new ArrayList<>();
@@ -93,11 +88,11 @@ public class TypeControllerTest {
     }
 
     private void setInvalidTypeParamsMessages() {
-        invalidParamsMessages.add("El campo name debe tener entre 1 y 20 caracteres");
+        invalidParamsMessages.add("The name field must have between 1 and 20 characters");
     }
 
     private void setEmptyTypeMessages() {
-        emptyTypeMessages.add("El campo name no puede estar vacío");
+        emptyTypeMessages.add("The name field can't be empty");
     }
 
     @Test
@@ -164,7 +159,7 @@ public class TypeControllerTest {
     @Test
     public void create_withProperType() throws Exception {
         when(typeService.save(any(Type.class))).thenReturn(type1);
-
+        
         mockMvc.perform(post("/api/types")
                 .content(objectMapper.writeValueAsString(type1))
                 .contentType(MediaType.APPLICATION_JSON))
@@ -173,7 +168,7 @@ public class TypeControllerTest {
                 .andExpect(jsonPath("$.type").exists())
                 .andExpect(jsonPath("$.type.name", is("TYPE1")))
                 .andExpect(jsonPath("$.msg").exists())
-                .andExpect(jsonPath("$.msg", is(messages.getCreated())));
+                .andExpect(jsonPath("$.msg", is(CrudMessagesEnum.CREATED.getMessage())));
 
         verify(typeService, times(1)).save(any(Type.class));
         verifyNoMoreInteractions(typeService);
@@ -191,7 +186,7 @@ public class TypeControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(jsonPath("$.errors").exists())
                 .andExpect(jsonPath("$.errors", hasSize(1)))
-                .andExpect(jsonPath("$.errors", hasItem("El campo name no puede estar vacío")));
+                .andExpect(jsonPath("$.errors", hasItem("The name field can't be empty")));
     }
 
     @Test
@@ -206,7 +201,7 @@ public class TypeControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(jsonPath("$.errors").exists())
                 .andExpect(jsonPath("$.errors", hasSize(1)))
-                .andExpect(jsonPath("$.errors", hasItem("El campo name debe tener entre 1 y 20 caracteres")));
+                .andExpect(jsonPath("$.errors", hasItem("The name field must have between 1 and 20 characters")));
     }
 
     @Test
@@ -230,7 +225,7 @@ public class TypeControllerTest {
     public void update_withProperTypeAndId() throws Exception {
         when(typeService.findById(anyLong())).thenReturn(type1);
         when(typeService.save(any(Type.class))).thenReturn(type1);
-
+        
         mockMvc.perform(put("/api/types/{id}", 1)
                 .content(objectMapper.writeValueAsString(type1))
                 .contentType(MediaType.APPLICATION_JSON))
@@ -239,7 +234,7 @@ public class TypeControllerTest {
                 .andExpect(jsonPath("$.type").exists())
                 .andExpect(jsonPath("$.type.name", is("TYPE1")))
                 .andExpect(jsonPath("$.msg").exists())
-                .andExpect(jsonPath("$.msg", is(messages.getUpdated())));
+                .andExpect(jsonPath("$.msg", is(CrudMessagesEnum.UPDATED.getMessage())));
 
         verify(typeService, times(1)).findById(anyLong());
         verify(typeService, times(1)).save(any(Type.class));
@@ -266,7 +261,7 @@ public class TypeControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(jsonPath("$.errors").exists())
                 .andExpect(jsonPath("$.errors", hasSize(1)))
-                .andExpect(jsonPath("$.errors", hasItem("El campo name no puede estar vacío")));
+                .andExpect(jsonPath("$.errors", hasItem("The name field can't be empty")));
     }
 
     @Test
@@ -281,7 +276,7 @@ public class TypeControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(jsonPath("$.errors").exists())
                 .andExpect(jsonPath("$.errors", hasSize(1)))
-                .andExpect(jsonPath("$.errors", hasItem("El campo name debe tener entre 1 y 20 caracteres")));
+                .andExpect(jsonPath("$.errors", hasItem("The name field must have between 1 and 20 characters")));
     }
 
     @Test
@@ -321,11 +316,11 @@ public class TypeControllerTest {
     @Test
     public void delete_withProperId() throws Exception {
         doNothing().when(typeService).delete(anyLong());
-
+        
         mockMvc.perform(MockMvcRequestBuilders.delete("/api/types/{id}", 1))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.msg").exists())
-                .andExpect(jsonPath("$.msg", is(messages.getDeleted())));
+                .andExpect(jsonPath("$.msg", is(CrudMessagesEnum.DELETED.getMessage())));
 
         verify(typeService, times(1)).delete(anyLong());
         verifyNoMoreInteractions(typeService);

@@ -2,7 +2,7 @@ package com.microservice.phrases.controllers;
 
 import com.microservice.phrases.exceptions.DatabaseAccessException;
 import com.microservice.phrases.exceptions.NullRecordException;
-import com.microservice.phrases.config.MessagesTranslate;
+import com.microservice.phrases.enums.CrudMessagesEnum;
 import com.microservice.phrases.enums.DatabaseMessagesEnum;
 import com.microservice.phrases.models.entity.Image;
 import com.microservice.phrases.models.services.IImageService;
@@ -40,9 +40,6 @@ public class ImageController {
         return imageService.findAll();
     }
 
-	@Autowired
-	private MessagesTranslate messages;
-	
     @GetMapping(path="/images/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> show(@PathVariable Long id) throws NullRecordException, DatabaseAccessException {
 
@@ -80,7 +77,7 @@ public class ImageController {
         	throw new DatabaseAccessException(DatabaseMessagesEnum.STORE_RECORD.getMessage(), e);
         }
 
-        response.put("msg", messages.getCreated());
+        response.put("msg", CrudMessagesEnum.CREATED.getMessage());
         response.put("image", newImage);
 
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
@@ -111,7 +108,7 @@ public class ImageController {
         	throw new DatabaseAccessException(DatabaseMessagesEnum.UPDATE_RECORD.getMessage(), e);
         }
 
-        response.put("msg", messages.getUpdated());
+        response.put("msg", CrudMessagesEnum.UPDATED.getMessage());
         response.put("image", imageUpdated);
 
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
@@ -128,7 +125,7 @@ public class ImageController {
         	throw new DatabaseAccessException(DatabaseMessagesEnum.DELETE_RECORD.getMessage(), e);
         }
 
-        response.put("msg", messages.getDeleted());
+        response.put("msg", CrudMessagesEnum.DELETED.getMessage());
 
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
     }

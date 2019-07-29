@@ -33,8 +33,8 @@ public class Type implements Serializable {
 	private Long id;
 	
 	@Column(unique=true)
-	@NotEmpty(message="no puede estar vacío")
-	@Size(min=1, max=20, message="debe tener entre 1 y 20 caracteres")
+	@NotEmpty(message="can't be empty")
+	@Size(min=1, max=20, message="must have between 1 and 20 characters")
 	private String name;
 	
 	@OneToMany(fetch=FetchType.LAZY, mappedBy="type", cascade=CascadeType.ALL)

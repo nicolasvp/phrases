@@ -1,7 +1,7 @@
 package com.microservice.phrases.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.microservice.phrases.config.MessagesTranslate;
+import com.microservice.phrases.enums.CrudMessagesEnum;
 import com.microservice.phrases.models.entity.Author;
 import com.microservice.phrases.models.entity.Image;
 import com.microservice.phrases.models.entity.Phrase;
@@ -13,7 +13,6 @@ import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -31,7 +30,6 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -55,9 +53,6 @@ public class PhraseControllerTest {
     @InjectMocks
     private PhraseController phraseController;
 
-	@Autowired
-	private MessagesTranslate messages;
-	
     private List<Phrase> dummyPhrases;
 
     private List<String> invalidParamsMessages = new ArrayList<>();
@@ -98,14 +93,14 @@ public class PhraseControllerTest {
     }
 
     private void setInvalidPhraseParamsMessages() {
-        invalidParamsMessages.add("El campo body debe tener entre 1 y 200 caracteres");
+        invalidParamsMessages.add("The body field must have between 1 and 200 characters");
     }
 
     private void setEmptyPhraseMessages() {
-        emptyPhraseMessages.add("El campo body no puede estar vacío");
-        emptyPhraseMessages.add("El campo author no puede estar vacío");
-        emptyPhraseMessages.add("El campo type no puede estar vacío");
-        emptyPhraseMessages.add("El campo image no puede estar vacío");
+        emptyPhraseMessages.add("The body field can't be empty");
+        emptyPhraseMessages.add("The author field can't be empty");
+        emptyPhraseMessages.add("The type field can't be empty");
+        emptyPhraseMessages.add("The image field can't be empty");
     }
 
     @Test
@@ -172,7 +167,7 @@ public class PhraseControllerTest {
     @Test
     public void create_withProperPhrase() throws Exception {
         when(phraseService.save(any(Phrase.class))).thenReturn(phrase1);
-
+        
         mockMvc.perform(post("/api/phrases")
                 .content(objectMapper.writeValueAsString(phrase1))
                 .contentType(MediaType.APPLICATION_JSON))
@@ -182,7 +177,7 @@ public class PhraseControllerTest {
                 .andExpect(jsonPath("$.phrase").exists())
                 .andExpect(jsonPath("$.phrase.body", is("phrase1")))
                 .andExpect(jsonPath("$.msg").exists())
-                .andExpect(jsonPath("$.msg", is(messages.getCreated())));
+                .andExpect(jsonPath("$.msg", is(CrudMessagesEnum.CREATED.getMessage())));
 
         verify(phraseService, times(1)).save(any(Phrase.class));
         verifyNoMoreInteractions(phraseService);
@@ -200,10 +195,10 @@ public class PhraseControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(jsonPath("$.errors").exists())
                 .andExpect(jsonPath("$.errors", hasSize(4)))
-                .andExpect(jsonPath("$.errors", hasItem("El campo body no puede estar vacío")))
-                .andExpect(jsonPath("$.errors", hasItem("El campo author no puede estar vacío")))
-                .andExpect(jsonPath("$.errors", hasItem("El campo type no puede estar vacío")))
-                .andExpect(jsonPath("$.errors", hasItem("El campo image no puede estar vacío")));
+                .andExpect(jsonPath("$.errors", hasItem("The body field can't be empty")))
+                .andExpect(jsonPath("$.errors", hasItem("The author field can't be empty")))
+                .andExpect(jsonPath("$.errors", hasItem("The type field can't be empty")))
+                .andExpect(jsonPath("$.errors", hasItem("The image field can't be empty")));
     }
 
     @Test
@@ -218,7 +213,7 @@ public class PhraseControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(jsonPath("$.errors").exists())
                 .andExpect(jsonPath("$.errors", hasSize(1)))
-                .andExpect(jsonPath("$.errors", hasItem("El campo body debe tener entre 1 y 200 caracteres")));
+                .andExpect(jsonPath("$.errors", hasItem("The body field must have between 1 and 200 characters")));
     }
 
     @Test
@@ -242,7 +237,7 @@ public class PhraseControllerTest {
     public void update_withProperPhraseAndId() throws Exception {
         when(phraseService.findById(anyLong())).thenReturn(phrase1);
         when(phraseService.save(any(Phrase.class))).thenReturn(phrase1);
-
+        
         mockMvc.perform(put("/api/phrases/{id}", 1)
                 .content(objectMapper.writeValueAsString(phrase1))
                 .contentType(MediaType.APPLICATION_JSON))
@@ -251,7 +246,7 @@ public class PhraseControllerTest {
                 .andExpect(jsonPath("$.phrase").exists())
                 .andExpect(jsonPath("$.phrase.body", is("phrase1")))
                 .andExpect(jsonPath("$.msg").exists())
-                .andExpect(jsonPath("$.msg", is(messages.getUpdated())));
+                .andExpect(jsonPath("$.msg", is(CrudMessagesEnum.UPDATED.getMessage())));
 
         verify(phraseService, times(1)).findById(anyLong());
         verify(phraseService, times(1)).save(any(Phrase.class));
@@ -278,10 +273,10 @@ public class PhraseControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(jsonPath("$.errors").exists())
                 .andExpect(jsonPath("$.errors", hasSize(4)))
-                .andExpect(jsonPath("$.errors", hasItem("El campo body no puede estar vacío")))
-                .andExpect(jsonPath("$.errors", hasItem("El campo author no puede estar vacío")))
-                .andExpect(jsonPath("$.errors", hasItem("El campo type no puede estar vacío")))
-                .andExpect(jsonPath("$.errors", hasItem("El campo image no puede estar vacío")));
+                .andExpect(jsonPath("$.errors", hasItem("The body field can't be empty")))
+                .andExpect(jsonPath("$.errors", hasItem("The author field can't be empty")))
+                .andExpect(jsonPath("$.errors", hasItem("The type field can't be empty")))
+                .andExpect(jsonPath("$.errors", hasItem("The image field can't be empty")));
     }
 
     @Test
@@ -296,7 +291,7 @@ public class PhraseControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(jsonPath("$.errors").exists())
                 .andExpect(jsonPath("$.errors", hasSize(1)))
-                .andExpect(jsonPath("$.errors", hasItem("El campo body debe tener entre 1 y 200 caracteres")));
+                .andExpect(jsonPath("$.errors", hasItem("The body field must have between 1 and 200 characters")));
     }
 
     @Test
@@ -336,11 +331,11 @@ public class PhraseControllerTest {
     @Test
     public void delete_withProperId() throws Exception {
         doNothing().when(phraseService).delete(anyLong());
-
+        
         mockMvc.perform(MockMvcRequestBuilders.delete("/api/phrases/{id}", 1))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.msg").exists())
-                .andExpect(jsonPath("$.msg", is(messages.getDeleted())));
+                .andExpect(jsonPath("$.msg", is(CrudMessagesEnum.DELETED.getMessage())));
 
         verify(phraseService, times(1)).delete(anyLong());
         verifyNoMoreInteractions(phraseService);

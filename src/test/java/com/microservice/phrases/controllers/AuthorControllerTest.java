@@ -1,7 +1,7 @@
 package com.microservice.phrases.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.microservice.phrases.config.MessagesTranslate;
+import com.microservice.phrases.enums.CrudMessagesEnum;
 import com.microservice.phrases.models.entity.Author;
 import com.microservice.phrases.models.services.IAuthorService;
 import com.microservice.phrases.models.services.IUtilService;
@@ -10,7 +10,6 @@ import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -26,7 +25,6 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -48,9 +46,6 @@ public class AuthorControllerTest {
     @InjectMocks
     private AuthorController authorController;
 
-	@Autowired
-	private MessagesTranslate messages;
-	
     private List<Author> dummyAuthors;
 
     private List<String> invalidParamsMessages = new ArrayList<>();
@@ -91,11 +86,11 @@ public class AuthorControllerTest {
     }
 
     private void setInvalidAuthorParamsMessages() {
-        invalidParamsMessages.add("El campo name debe tener entre 1 y 100 caracteres");
+        invalidParamsMessages.add("The name field must have between 1 and 100 characters");
     }
 
     private void setEmptyAuthorMessages() {
-        emptyAuthorMessages.add("El campo name no puede estar vacío");
+        emptyAuthorMessages.add("The name field can't be empty");
     }
 
     @Test
@@ -162,7 +157,7 @@ public class AuthorControllerTest {
     @Test
     public void create_withProperAuthor() throws Exception {
         when(authorService.save(any(Author.class))).thenReturn(author1);
-
+        
         mockMvc.perform(post("/api/authors")
                 .content(objectMapper.writeValueAsString(author1))
                 .contentType(MediaType.APPLICATION_JSON))
@@ -171,7 +166,7 @@ public class AuthorControllerTest {
                 .andExpect(jsonPath("$.author").exists())
                 .andExpect(jsonPath("$.author.name", is("AUTHOR1")))
                 .andExpect(jsonPath("$.msg").exists())
-                .andExpect(jsonPath("$.msg", is(messages.getCreated())));
+                .andExpect(jsonPath("$.msg", is(CrudMessagesEnum.CREATED.getMessage())));
 
         verify(authorService, times(1)).save(any(Author.class));
         verifyNoMoreInteractions(authorService);
@@ -189,7 +184,7 @@ public class AuthorControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(jsonPath("$.errors").exists())
                 .andExpect(jsonPath("$.errors", hasSize(1)))
-                .andExpect(jsonPath("$.errors", hasItem("El campo name no puede estar vacío")));
+                .andExpect(jsonPath("$.errors", hasItem("The name field can't be empty")));
     }
 
     @Test
@@ -204,7 +199,7 @@ public class AuthorControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(jsonPath("$.errors").exists())
                 .andExpect(jsonPath("$.errors", hasSize(1)))
-                .andExpect(jsonPath("$.errors", hasItem("El campo name debe tener entre 1 y 100 caracteres")));
+                .andExpect(jsonPath("$.errors", hasItem("The name field must have between 1 and 100 characters")));
     }
 
     @Test
@@ -228,7 +223,7 @@ public class AuthorControllerTest {
     public void update_withProperAuthorAndId() throws Exception {
         when(authorService.findById(anyLong())).thenReturn(author1);
         when(authorService.save(any(Author.class))).thenReturn(author1);
-
+        
         mockMvc.perform(put("/api/authors/{id}", 1)
                 .content(objectMapper.writeValueAsString(author1))
                 .contentType(MediaType.APPLICATION_JSON))
@@ -237,7 +232,7 @@ public class AuthorControllerTest {
                 .andExpect(jsonPath("$.author").exists())
                 .andExpect(jsonPath("$.author.name", is("AUTHOR1")))
                 .andExpect(jsonPath("$.msg").exists())
-                .andExpect(jsonPath("$.msg", is(messages.getUpdated())));
+                .andExpect(jsonPath("$.msg", is(CrudMessagesEnum.UPDATED.getMessage())));
 
         verify(authorService, times(1)).findById(anyLong());
         verify(authorService, times(1)).save(any(Author.class));
@@ -264,7 +259,7 @@ public class AuthorControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(jsonPath("$.errors").exists())
                 .andExpect(jsonPath("$.errors", hasSize(1)))
-                .andExpect(jsonPath("$.errors", hasItem("El campo name no puede estar vacío")));
+                .andExpect(jsonPath("$.errors", hasItem("The name field can't be empty")));
     }
 
     @Test
@@ -279,7 +274,7 @@ public class AuthorControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(jsonPath("$.errors").exists())
                 .andExpect(jsonPath("$.errors", hasSize(1)))
-                .andExpect(jsonPath("$.errors", hasItem("El campo name debe tener entre 1 y 100 caracteres")));
+                .andExpect(jsonPath("$.errors", hasItem("The name field must have between 1 and 100 characters")));
     }
 
     @Test
@@ -319,11 +314,11 @@ public class AuthorControllerTest {
     @Test
     public void delete_withProperId() throws Exception {
         doNothing().when(authorService).delete(anyLong());
-
+        
         mockMvc.perform(MockMvcRequestBuilders.delete("/api/authors/{id}", 1))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.msg").exists())
-                .andExpect(jsonPath("$.msg", is(messages.getDeleted())));
+                .andExpect(jsonPath("$.msg", is(CrudMessagesEnum.DELETED.getMessage())));
 
         verify(authorService, times(1)).delete(anyLong());
         verifyNoMoreInteractions(authorService);

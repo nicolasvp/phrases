@@ -3,10 +3,7 @@ package com.microservice.phrases.controllers;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-
 import javax.validation.Valid;
-
 import com.microservice.phrases.models.services.IUtilService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,8 +22,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.microservice.phrases.config.MessagesTranslate;
+import com.microservice.phrases.enums.CrudMessagesEnum;
 import com.microservice.phrases.enums.DatabaseMessagesEnum;
 import com.microservice.phrases.exceptions.DatabaseAccessException;
 import com.microservice.phrases.exceptions.NullRecordException;
@@ -46,9 +42,6 @@ public class TypeController {
 	@Autowired
 	private IUtilService utilService;
 
-	@Autowired
-	private MessagesTranslate messages;
-	
 	@GetMapping(path="/types", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<Type> index(){
 		return typeService.findAll();
@@ -91,7 +84,7 @@ public class TypeController {
 			throw new DatabaseAccessException(DatabaseMessagesEnum.STORE_RECORD.getMessage(), e);
 		}
 
-		response.put("msg", messages.getCreated());
+		response.put("msg", CrudMessagesEnum.CREATED.getMessage());
 		response.put("type", newType);
 
 		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
@@ -122,7 +115,7 @@ public class TypeController {
 			throw new DatabaseAccessException(DatabaseMessagesEnum.UPDATE_RECORD.getMessage(), e);
 		}
 
-		response.put("msg", messages.getUpdated());
+		response.put("msg", CrudMessagesEnum.UPDATED.getMessage());
 		response.put("type", typeUpdated);
 
 		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
@@ -139,7 +132,7 @@ public class TypeController {
 			throw new DatabaseAccessException(DatabaseMessagesEnum.DELETE_RECORD.getMessage(), e);
 		}
 
-		response.put("msg", messages.getDeleted());
+		response.put("msg", CrudMessagesEnum.DELETED.getMessage());
 
 		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
 	}

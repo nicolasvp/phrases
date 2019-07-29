@@ -33,21 +33,21 @@ public class Phrase implements Serializable {
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private Long id;
 	
-	@NotEmpty(message="no puede estar vacío")
-	@Size(min=1, max=200, message="debe tener entre 1 y 200 caracteres")
+	@NotEmpty(message="can't be empty")
+	@Size(min=1, max=200, message="must have between 1 and 200 characters")
 	private String body;
 	
-	@NotNull(message="no puede estar vacío")
+	@NotNull(message="can't be empty")
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="author_id")
 	private Author author;
 	
-	@NotNull(message="no puede estar vacío")
+	@NotNull(message="can't be empty")
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="type_id")
 	private Type type;
 	
-	@NotNull(message="no puede estar vacío")
+	@NotNull(message="can't be empty")
 	@OneToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="image_id", referencedColumnName="id")
 	private Image image;
