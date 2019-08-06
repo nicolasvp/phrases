@@ -1,10 +1,10 @@
 package com.microservice.phrases.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.microservice.phrases.enums.CrudMessagesEnum;
-import com.microservice.phrases.models.entity.Type;
+import com.microservices.commons.enums.CrudMessagesEnum;
+import com.microservices.commons.models.entity.phrases.Type;
 import com.microservice.phrases.models.services.ITypeService;
-import com.microservice.phrases.models.services.IUtilService;
+import com.microservices.commons.models.services.IUtilService;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;

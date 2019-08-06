@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.microservice.phrases.models.dao.ITypeDao;
-import com.microservice.phrases.models.entity.Type;
+import com.microservices.commons.models.entity.phrases.Type;
 
 @Service
 public class TypeServiceImpl implements ITypeService {

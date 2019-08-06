@@ -2,7 +2,7 @@ package com.microservice.phrases.models.services;
 
 import java.util.List;
 
-import com.microservice.phrases.models.entity.Author;
+import com.microservices.commons.models.entity.phrases.Author;
 
 public interface IAuthorService {
 

@@ -2,7 +2,7 @@ package com.microservice.phrases.models.services;
 
 import java.util.List;
 
-import com.microservice.phrases.models.entity.Type;
+import com.microservices.commons.models.entity.phrases.Type;
 
 public interface ITypeService {
 

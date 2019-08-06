@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.microservice.phrases.models.dao.IAuthorDao;
-import com.microservice.phrases.models.entity.Author;
+import com.microservices.commons.models.entity.phrases.Author;
 
 @Service
 public class AuthorServiceImpl implements IAuthorService {

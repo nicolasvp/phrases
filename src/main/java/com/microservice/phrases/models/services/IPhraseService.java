@@ -2,7 +2,7 @@ package com.microservice.phrases.models.services;
 
 import java.util.List;
 
-import com.microservice.phrases.models.entity.Phrase;
+import com.microservices.commons.models.entity.phrases.Phrase;
 
 public interface IPhraseService {
 

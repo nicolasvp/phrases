@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.microservice.phrases.models.dao.IImageDao;
-import com.microservice.phrases.models.entity.Image;
+import com.microservices.commons.models.entity.phrases.Image;
 
 @Service
 public class ImageServiceImpl implements IImageService {

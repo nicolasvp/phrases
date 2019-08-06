@@ -1,12 +1,12 @@
 package com.microservice.phrases.controllers;
 
-import com.microservice.phrases.exceptions.DatabaseAccessException;
-import com.microservice.phrases.exceptions.NullRecordException;
-import com.microservice.phrases.enums.CrudMessagesEnum;
-import com.microservice.phrases.enums.DatabaseMessagesEnum;
-import com.microservice.phrases.models.entity.Image;
+import com.microservices.commons.exceptions.DatabaseAccessException;
+import com.microservices.commons.exceptions.NullRecordException;
+import com.microservices.commons.enums.CrudMessagesEnum;
+import com.microservices.commons.enums.DatabaseMessagesEnum;
+import com.microservices.commons.models.entity.phrases.Image;
 import com.microservice.phrases.models.services.IImageService;
-import com.microservice.phrases.models.services.IUtilService;
+import com.microservices.commons.models.services.IUtilService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -4,11 +4,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.validation.Valid;
-import com.microservice.phrases.models.services.IUtilService;
-import com.microservice.phrases.enums.CrudMessagesEnum;
-import com.microservice.phrases.enums.DatabaseMessagesEnum;
-import com.microservice.phrases.exceptions.DatabaseAccessException;
-import com.microservice.phrases.exceptions.NullRecordException;
+import com.microservices.commons.models.services.IUtilService;
+import com.microservices.commons.enums.CrudMessagesEnum;
+import com.microservices.commons.enums.DatabaseMessagesEnum;
+import com.microservices.commons.exceptions.DatabaseAccessException;
+import com.microservices.commons.exceptions.NullRecordException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.microservice.phrases.models.entity.Author;
+import com.microservices.commons.models.entity.phrases.Author;
 import com.microservice.phrases.models.services.IAuthorService;
 
 @CrossOrigin(origins = { "http://localhost:4200" })

@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.microservice.phrases.models.dao.IPhraseDao;
-import com.microservice.phrases.models.entity.Phrase;
+import com.microservices.commons.models.entity.phrases.Phrase;
 import com.microservice.phrases.models.services.remote.IUserRemoteCallService;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 

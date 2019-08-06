@@ -1,13 +1,13 @@
 package com.microservice.phrases.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.microservice.phrases.enums.CrudMessagesEnum;
-import com.microservice.phrases.models.entity.Author;
-import com.microservice.phrases.models.entity.Image;
-import com.microservice.phrases.models.entity.Phrase;
-import com.microservice.phrases.models.entity.Type;
+import com.microservices.commons.enums.CrudMessagesEnum;
+import com.microservices.commons.models.entity.phrases.Author;
+import com.microservices.commons.models.entity.phrases.Image;
+import com.microservices.commons.models.entity.phrases.Phrase;
+import com.microservices.commons.models.entity.phrases.Type;
 import com.microservice.phrases.models.services.IPhraseService;
-import com.microservice.phrases.models.services.IUtilService;
+import com.microservices.commons.models.services.IUtilService;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
