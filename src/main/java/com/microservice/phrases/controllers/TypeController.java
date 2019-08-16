@@ -31,7 +31,6 @@ import com.microservice.phrases.models.services.ITypeService;
 
 @CrossOrigin(origins = { "http://localhost:4200" })
 @RestController
-@RequestMapping("/api")
 public class TypeController {
 
 	protected Logger LOGGER = LoggerFactory.getLogger(TypeController.class);

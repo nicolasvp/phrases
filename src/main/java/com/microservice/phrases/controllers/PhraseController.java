@@ -32,7 +32,6 @@ import com.microservice.phrases.models.services.IPhraseService;
 
 @CrossOrigin(origins = { "http://localhost:4200" })
 @RestController
-@RequestMapping("/api")
 public class PhraseController {
 
 	protected Logger LOGGER = LoggerFactory.getLogger(PhraseController.class);
