@@ -99,7 +99,7 @@ public class TypeControllerTest {
     public void index() throws Exception {
         when(typeService.findAll()).thenReturn(dummyTypes);
 
-        mockMvc.perform(get("/api/types")
+        mockMvc.perform(get("/types")
                 .contentType("application/json"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
@@ -116,7 +116,7 @@ public class TypeControllerTest {
     public void show_withProperId() throws Exception {
         when(typeService.findById(1L)).thenReturn(type1);
 
-        mockMvc.perform(get("/api/types/{id}", 1))
+        mockMvc.perform(get("/types/{id}", 1))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(jsonPath("$.name", is("TYPE1")));
@@ -127,14 +127,14 @@ public class TypeControllerTest {
 
     @Test
     public void show_whenIdIsInvalid() throws Exception {
-        mockMvc.perform(get("/api/types/{id}", "randomString"))
+        mockMvc.perform(get("/types/{id}", "randomString"))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
     public void show_whenRecordDoesnotExist() throws Exception {
         when(typeService.findById(anyLong())).thenReturn(null);
-        mockMvc.perform(get("/api/types/{id}", anyLong()))
+        mockMvc.perform(get("/types/{id}", anyLong()))
                 .andExpect(status().isNotFound());
 
         verify(typeService, times(1)).findById(anyLong());
@@ -145,7 +145,7 @@ public class TypeControllerTest {
     public void show_whenDBFailsThenThrowsException() throws Exception {
         when(typeService.findById(1L)).thenThrow(new DataAccessException("..."){});
 
-        mockMvc.perform(get("/api/types/{id}", 1))
+        mockMvc.perform(get("/types/{id}", 1))
                 .andExpect(status().isInternalServerError());
 
         verify(typeService, times(1)).findById(1L);
@@ -160,7 +160,7 @@ public class TypeControllerTest {
     public void create_withProperType() throws Exception {
         when(typeService.save(any(Type.class))).thenReturn(type1);
         
-        mockMvc.perform(post("/api/types")
+        mockMvc.perform(post("/types")
                 .content(objectMapper.writeValueAsString(type1))
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated())
@@ -178,7 +178,7 @@ public class TypeControllerTest {
     public void create_whenTypeIsEmpty() throws Exception {
         when(utilService.listErrors(any())).thenReturn(emptyTypeMessages);
 
-        mockMvc.perform(post("/api/types")
+        mockMvc.perform(post("/types")
                 .content(objectMapper.writeValueAsString(new Type()))
                 .contentType(MediaType.APPLICATION_JSON))
                 //.andDo(print())
@@ -193,7 +193,7 @@ public class TypeControllerTest {
     public void create_whenTypeHasInvalidParams() throws Exception {
         when(utilService.listErrors(any())).thenReturn(invalidParamsMessages);
 
-        mockMvc.perform(post("/api/types")
+        mockMvc.perform(post("/types")
                 .content(objectMapper.writeValueAsString(invalidType))
                 .contentType(MediaType.APPLICATION_JSON))
                 //.andDo(print())
@@ -208,7 +208,7 @@ public class TypeControllerTest {
     public void create_whenDBFailsThenThrowsException() throws Exception {
         when(typeService.save(any(Type.class))).thenThrow(new DataAccessException("..."){});
 
-        mockMvc.perform(post("/api/types")
+        mockMvc.perform(post("/types")
                 .content(objectMapper.writeValueAsString(type1))
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isInternalServerError());
@@ -226,7 +226,7 @@ public class TypeControllerTest {
         when(typeService.findById(anyLong())).thenReturn(type1);
         when(typeService.save(any(Type.class))).thenReturn(type1);
         
-        mockMvc.perform(put("/api/types/{id}", 1)
+        mockMvc.perform(put("/types/{id}", 1)
                 .content(objectMapper.writeValueAsString(type1))
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated())
@@ -243,7 +243,7 @@ public class TypeControllerTest {
 
     @Test
     public void update_whenTypeIsProper_andInvalidId() throws Exception {
-        mockMvc.perform(put("/api/types/{id}", "randomString")
+        mockMvc.perform(put("/types/{id}", "randomString")
                 .content(objectMapper.writeValueAsString(type1))
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
@@ -253,7 +253,7 @@ public class TypeControllerTest {
     public void update_whenTypeIsEmpty_AndProperId() throws Exception {
         when(utilService.listErrors(any())).thenReturn(emptyTypeMessages);
 
-        mockMvc.perform(put("/api/types/{id}", 1)
+        mockMvc.perform(put("/types/{id}", 1)
                 .content(objectMapper.writeValueAsString(new Type()))
                 .contentType(MediaType.APPLICATION_JSON))
                 //.andDo(print())
@@ -268,7 +268,7 @@ public class TypeControllerTest {
     public void update_whenTypeIsInvalid_AndProperId() throws Exception {
         when(utilService.listErrors(any())).thenReturn(invalidParamsMessages);
 
-        mockMvc.perform(put("/api/types/{id}", 1)
+        mockMvc.perform(put("/types/{id}", 1)
                 .content(objectMapper.writeValueAsString(invalidType))
                 .contentType(MediaType.APPLICATION_JSON))
                 //.andDo(print())
@@ -283,7 +283,7 @@ public class TypeControllerTest {
     public void update_whenTypeIsNotFound() throws Exception {
         when(typeService.findById(anyLong())).thenReturn(null);
 
-        mockMvc.perform(put("/api/types/{id}", anyLong())
+        mockMvc.perform(put("/types/{id}", anyLong())
                 .content(objectMapper.writeValueAsString(type1))
                 .contentType(MediaType.APPLICATION_JSON))
                 //.andDo(print())
@@ -298,7 +298,7 @@ public class TypeControllerTest {
         when(typeService.save(any(Type.class))).thenThrow(new DataAccessException("..."){});
         when(typeService.findById(anyLong())).thenReturn(type1);
 
-        mockMvc.perform(put("/api/types/{id}", 1)
+        mockMvc.perform(put("/types/{id}", 1)
                 .content(objectMapper.writeValueAsString(type1))
                 .contentType(MediaType.APPLICATION_JSON))
                 //.andDo(print())
@@ -317,7 +317,7 @@ public class TypeControllerTest {
     public void delete_withProperId() throws Exception {
         doNothing().when(typeService).delete(anyLong());
         
-        mockMvc.perform(MockMvcRequestBuilders.delete("/api/types/{id}", 1))
+        mockMvc.perform(MockMvcRequestBuilders.delete("/types/{id}", 1))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.msg").exists())
                 .andExpect(jsonPath("$.msg", is(CrudMessagesEnum.DELETED.getMessage())));
@@ -329,7 +329,7 @@ public class TypeControllerTest {
     @Test
     public void delete_withInvalidId() throws Exception {
 
-        mockMvc.perform(MockMvcRequestBuilders.delete("/api/types/{id}", "randomString"))
+        mockMvc.perform(MockMvcRequestBuilders.delete("/types/{id}", "randomString"))
                 .andExpect(status().isBadRequest());
     }
 
@@ -337,7 +337,7 @@ public class TypeControllerTest {
     public void delete_whenTypeIsNotFoundThenThrowException() throws Exception {
         doThrow(new DataAccessException("..."){}).when(typeService).delete(anyLong());
 
-        mockMvc.perform(MockMvcRequestBuilders.delete("/api/types/{id}", anyLong())
+        mockMvc.perform(MockMvcRequestBuilders.delete("/types/{id}", anyLong())
                 .contentType(MediaType.APPLICATION_JSON))
                 //.andDo(print())
                 .andExpect(status().isInternalServerError());

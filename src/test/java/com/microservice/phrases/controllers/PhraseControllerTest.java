@@ -107,7 +107,7 @@ public class PhraseControllerTest {
     public void index() throws Exception {
         when(phraseService.findAll()).thenReturn(dummyPhrases);
 
-        mockMvc.perform(get("/api/phrases")
+        mockMvc.perform(get("/phrases")
                 .contentType("application/json"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
@@ -124,7 +124,7 @@ public class PhraseControllerTest {
     public void show_withProperId() throws Exception {
         when(phraseService.findById(1L)).thenReturn(phrase1);
 
-        mockMvc.perform(get("/api/phrases/{id}", 1))
+        mockMvc.perform(get("/phrases/{id}", 1))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(jsonPath("$.body", is("phrase1")));
@@ -135,14 +135,14 @@ public class PhraseControllerTest {
 
     @Test
     public void show_whenIdIsInvalid() throws Exception {
-        mockMvc.perform(get("/api/phrases/{id}", "randomString"))
+        mockMvc.perform(get("/phrases/{id}", "randomString"))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
     public void show_whenRecordDoesnotExist() throws Exception {
         when(phraseService.findById(anyLong())).thenReturn(null);
-        mockMvc.perform(get("/api/phrases/{id}", anyLong()))
+        mockMvc.perform(get("/phrases/{id}", anyLong()))
                 .andExpect(status().isNotFound());
 
         verify(phraseService, times(1)).findById(anyLong());
@@ -153,7 +153,7 @@ public class PhraseControllerTest {
     public void show_whenDBFailsThenThrowsException() throws Exception {
         when(phraseService.findById(1L)).thenThrow(new DataAccessException("..."){});
 
-        mockMvc.perform(get("/api/phrases/{id}", 1))
+        mockMvc.perform(get("/phrases/{id}", 1))
                 .andExpect(status().isInternalServerError());
 
         verify(phraseService, times(1)).findById(1L);
@@ -168,7 +168,7 @@ public class PhraseControllerTest {
     public void create_withProperPhrase() throws Exception {
         when(phraseService.save(any(Phrase.class))).thenReturn(phrase1);
         
-        mockMvc.perform(post("/api/phrases")
+        mockMvc.perform(post("/phrases")
                 .content(objectMapper.writeValueAsString(phrase1))
                 .contentType(MediaType.APPLICATION_JSON))
                 //  .andDo(print())
@@ -187,7 +187,7 @@ public class PhraseControllerTest {
     public void create_whenPhraseIsEmpty() throws Exception {
         when(utilService.listErrors(any())).thenReturn(emptyPhraseMessages);
 
-        mockMvc.perform(post("/api/phrases")
+        mockMvc.perform(post("/phrases")
                 .content(objectMapper.writeValueAsString(new Phrase()))
                 .contentType(MediaType.APPLICATION_JSON))
                 //.andDo(print())
@@ -205,7 +205,7 @@ public class PhraseControllerTest {
     public void create_whenPhraseHasInvalidParams() throws Exception {
         when(utilService.listErrors(any())).thenReturn(invalidParamsMessages);
 
-        mockMvc.perform(post("/api/phrases")
+        mockMvc.perform(post("/phrases")
                 .content(objectMapper.writeValueAsString(invalidPhrase))
                 .contentType(MediaType.APPLICATION_JSON))
                 //.andDo(print())
@@ -220,7 +220,7 @@ public class PhraseControllerTest {
     public void create_whenDBFailsThenThrowsException() throws Exception {
         when(phraseService.save(any(Phrase.class))).thenThrow(new DataAccessException("..."){});
 
-        mockMvc.perform(post("/api/phrases")
+        mockMvc.perform(post("/phrases")
                 .content(objectMapper.writeValueAsString(phrase1))
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isInternalServerError());
@@ -238,7 +238,7 @@ public class PhraseControllerTest {
         when(phraseService.findById(anyLong())).thenReturn(phrase1);
         when(phraseService.save(any(Phrase.class))).thenReturn(phrase1);
         
-        mockMvc.perform(put("/api/phrases/{id}", 1)
+        mockMvc.perform(put("/phrases/{id}", 1)
                 .content(objectMapper.writeValueAsString(phrase1))
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated())
@@ -255,7 +255,7 @@ public class PhraseControllerTest {
 
     @Test
     public void update_whenPhraseIsProper_andInvalidId() throws Exception {
-        mockMvc.perform(put("/api/phrases/{id}", "randomString")
+        mockMvc.perform(put("/phrases/{id}", "randomString")
                 .content(objectMapper.writeValueAsString(phrase1))
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
@@ -265,7 +265,7 @@ public class PhraseControllerTest {
     public void update_whenPhraseIsEmpty_AndProperId() throws Exception {
         when(utilService.listErrors(any())).thenReturn(emptyPhraseMessages);
 
-        mockMvc.perform(put("/api/phrases/{id}", 1)
+        mockMvc.perform(put("/phrases/{id}", 1)
                 .content(objectMapper.writeValueAsString(new Type()))
                 .contentType(MediaType.APPLICATION_JSON))
                 //.andDo(print())
@@ -283,7 +283,7 @@ public class PhraseControllerTest {
     public void update_whenPhraseIsInvalid_AndProperId() throws Exception {
         when(utilService.listErrors(any())).thenReturn(invalidParamsMessages);
 
-        mockMvc.perform(put("/api/phrases/{id}", 1)
+        mockMvc.perform(put("/phrases/{id}", 1)
                 .content(objectMapper.writeValueAsString(invalidPhrase))
                 .contentType(MediaType.APPLICATION_JSON))
                 //.andDo(print())
@@ -298,7 +298,7 @@ public class PhraseControllerTest {
     public void update_whenPhraseIsNotFound() throws Exception {
         when(phraseService.findById(anyLong())).thenReturn(null);
 
-        mockMvc.perform(put("/api/phrases/{id}", anyLong())
+        mockMvc.perform(put("/phrases/{id}", anyLong())
                 .content(objectMapper.writeValueAsString(phrase1))
                 .contentType(MediaType.APPLICATION_JSON))
                 //.andDo(print())
@@ -313,7 +313,7 @@ public class PhraseControllerTest {
         when(phraseService.save(any(Phrase.class))).thenThrow(new DataAccessException("..."){});
         when(phraseService.findById(anyLong())).thenReturn(phrase1);
 
-        mockMvc.perform(put("/api/phrases/{id}", 1)
+        mockMvc.perform(put("/phrases/{id}", 1)
                 .content(objectMapper.writeValueAsString(phrase1))
                 .contentType(MediaType.APPLICATION_JSON))
                 //.andDo(print())
@@ -332,7 +332,7 @@ public class PhraseControllerTest {
     public void delete_withProperId() throws Exception {
         doNothing().when(phraseService).delete(anyLong());
         
-        mockMvc.perform(MockMvcRequestBuilders.delete("/api/phrases/{id}", 1))
+        mockMvc.perform(MockMvcRequestBuilders.delete("/phrases/{id}", 1))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.msg").exists())
                 .andExpect(jsonPath("$.msg", is(CrudMessagesEnum.DELETED.getMessage())));
@@ -344,7 +344,7 @@ public class PhraseControllerTest {
     @Test
     public void delete_withInvalidId() throws Exception {
 
-        mockMvc.perform(MockMvcRequestBuilders.delete("/api/phrases/{id}", "randomString"))
+        mockMvc.perform(MockMvcRequestBuilders.delete("/phrases/{id}", "randomString"))
                 .andExpect(status().isBadRequest());
     }
 
@@ -352,7 +352,7 @@ public class PhraseControllerTest {
     public void delete_whenPhraseIsNotFoundThenThrowException() throws Exception {
         doThrow(new DataAccessException("..."){}).when(phraseService).delete(anyLong());
 
-        mockMvc.perform(MockMvcRequestBuilders.delete("/api/phrases/{id}", anyLong())
+        mockMvc.perform(MockMvcRequestBuilders.delete("/phrases/{id}", anyLong())
                 .contentType(MediaType.APPLICATION_JSON))
                 //.andDo(print())
                 .andExpect(status().isInternalServerError());

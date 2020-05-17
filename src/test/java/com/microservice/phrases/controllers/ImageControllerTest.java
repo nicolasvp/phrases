@@ -100,7 +100,7 @@ public class ImageControllerTest {
     public void index() throws Exception {
         when(imageService.findAll()).thenReturn(dummyImages);
 
-        mockMvc.perform(get("/api/images")
+        mockMvc.perform(get("/images")
                 .contentType("application/json"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
@@ -117,7 +117,7 @@ public class ImageControllerTest {
     public void show_withProperId() throws Exception {
         when(imageService.findById(1L)).thenReturn(image1);
 
-        mockMvc.perform(get("/api/images/{id}", 1))
+        mockMvc.perform(get("/images/{id}", 1))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(jsonPath("$.name", is("IMAGE1")));
@@ -128,14 +128,14 @@ public class ImageControllerTest {
 
     @Test
     public void show_whenIdIsInvalid() throws Exception {
-        mockMvc.perform(get("/api/images/{id}", "randomString"))
+        mockMvc.perform(get("/images/{id}", "randomString"))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
     public void show_whenRecordDoesnotExist() throws Exception {
         when(imageService.findById(anyLong())).thenReturn(null);
-        mockMvc.perform(get("/api/images/{id}", anyLong()))
+        mockMvc.perform(get("/images/{id}", anyLong()))
                 .andExpect(status().isNotFound());
 
         verify(imageService, times(1)).findById(anyLong());
@@ -146,7 +146,7 @@ public class ImageControllerTest {
     public void show_whenDBFailsThenThrowsException() throws Exception {
         when(imageService.findById(1L)).thenThrow(new DataAccessException("..."){});
 
-        mockMvc.perform(get("/api/images/{id}", 1))
+        mockMvc.perform(get("/images/{id}", 1))
                 .andExpect(status().isInternalServerError());
 
         verify(imageService, times(1)).findById(1L);
@@ -161,7 +161,7 @@ public class ImageControllerTest {
     public void create_withProperImage() throws Exception {
         when(imageService.save(any(Image.class))).thenReturn(image1);
         
-        mockMvc.perform(post("/api/images")
+        mockMvc.perform(post("/images")
                 .content(objectMapper.writeValueAsString(image1))
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated())
@@ -179,7 +179,7 @@ public class ImageControllerTest {
     public void create_whenImageIsEmpty() throws Exception {
         when(utilService.listErrors(any())).thenReturn(emptyImageMessages);
 
-        mockMvc.perform(post("/api/images")
+        mockMvc.perform(post("/images")
                 .content(objectMapper.writeValueAsString(new Image()))
                 .contentType(MediaType.APPLICATION_JSON))
                 //.andDo(print())
@@ -194,7 +194,7 @@ public class ImageControllerTest {
     public void create_whenImageHasInvalidParams() throws Exception {
         when(utilService.listErrors(any())).thenReturn(invalidParamsMessages);
 
-        mockMvc.perform(post("/api/images")
+        mockMvc.perform(post("/images")
                 .content(objectMapper.writeValueAsString(invalidImage))
                 .contentType(MediaType.APPLICATION_JSON))
                 //.andDo(print())
@@ -209,7 +209,7 @@ public class ImageControllerTest {
     public void create_whenDBFailsThenThrowsException() throws Exception {
         when(imageService.save(any(Image.class))).thenThrow(new DataAccessException("..."){});
 
-        mockMvc.perform(post("/api/images")
+        mockMvc.perform(post("/images")
                 .content(objectMapper.writeValueAsString(image1))
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isInternalServerError());
@@ -227,7 +227,7 @@ public class ImageControllerTest {
         when(imageService.findById(anyLong())).thenReturn(image1);
         when(imageService.save(any(Image.class))).thenReturn(image1);
         
-        mockMvc.perform(put("/api/images/{id}", 1)
+        mockMvc.perform(put("/images/{id}", 1)
                 .content(objectMapper.writeValueAsString(image1))
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated())
@@ -244,7 +244,7 @@ public class ImageControllerTest {
 
     @Test
     public void update_whenImageIsProper_andInvalidId() throws Exception {
-        mockMvc.perform(put("/api/images/{id}", "randomString")
+        mockMvc.perform(put("/images/{id}", "randomString")
                 .content(objectMapper.writeValueAsString(image1))
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
@@ -254,7 +254,7 @@ public class ImageControllerTest {
     public void update_whenImageIsEmpty_AndProperId() throws Exception {
         when(utilService.listErrors(any())).thenReturn(emptyImageMessages);
 
-        mockMvc.perform(put("/api/images/{id}", 1)
+        mockMvc.perform(put("/images/{id}", 1)
                 .content(objectMapper.writeValueAsString(new Type()))
                 .contentType(MediaType.APPLICATION_JSON))
                 //.andDo(print())
@@ -269,7 +269,7 @@ public class ImageControllerTest {
     public void update_whenImageIsInvalid_AndProperId() throws Exception {
         when(utilService.listErrors(any())).thenReturn(invalidParamsMessages);
 
-        mockMvc.perform(put("/api/images/{id}", 1)
+        mockMvc.perform(put("/images/{id}", 1)
                 .content(objectMapper.writeValueAsString(invalidImage))
                 .contentType(MediaType.APPLICATION_JSON))
                 //.andDo(print())
@@ -284,7 +284,7 @@ public class ImageControllerTest {
     public void update_whenImageIsNotFound() throws Exception {
         when(imageService.findById(anyLong())).thenReturn(null);
 
-        mockMvc.perform(put("/api/images/{id}", anyLong())
+        mockMvc.perform(put("/images/{id}", anyLong())
                 .content(objectMapper.writeValueAsString(image1))
                 .contentType(MediaType.APPLICATION_JSON))
                 //.andDo(print())
@@ -299,7 +299,7 @@ public class ImageControllerTest {
         when(imageService.save(any(Image.class))).thenThrow(new DataAccessException("..."){});
         when(imageService.findById(anyLong())).thenReturn(image1);
 
-        mockMvc.perform(put("/api/images/{id}", 1)
+        mockMvc.perform(put("/images/{id}", 1)
                 .content(objectMapper.writeValueAsString(image1))
                 .contentType(MediaType.APPLICATION_JSON))
                 //.andDo(print())
@@ -318,7 +318,7 @@ public class ImageControllerTest {
     public void delete_withProperId() throws Exception {
         doNothing().when(imageService).delete(anyLong());
         
-        mockMvc.perform(MockMvcRequestBuilders.delete("/api/images/{id}", 1))
+        mockMvc.perform(MockMvcRequestBuilders.delete("/images/{id}", 1))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.msg").exists())
                 .andExpect(jsonPath("$.msg", is(CrudMessagesEnum.DELETED.getMessage())));
@@ -330,7 +330,7 @@ public class ImageControllerTest {
     @Test
     public void delete_withInvalidId() throws Exception {
 
-        mockMvc.perform(MockMvcRequestBuilders.delete("/api/images/{id}", "randomString"))
+        mockMvc.perform(MockMvcRequestBuilders.delete("/images/{id}", "randomString"))
                 .andExpect(status().isBadRequest());
     }
 
@@ -338,7 +338,7 @@ public class ImageControllerTest {
     public void delete_whenImageIsNotFoundThenThrowException() throws Exception {
         doThrow(new DataAccessException("..."){}).when(imageService).delete(anyLong());
 
-        mockMvc.perform(MockMvcRequestBuilders.delete("/api/images/{id}", anyLong())
+        mockMvc.perform(MockMvcRequestBuilders.delete("/images/{id}", anyLong())
                 .contentType(MediaType.APPLICATION_JSON))
                 //.andDo(print())
                 .andExpect(status().isInternalServerError());

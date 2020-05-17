@@ -1,8 +1,7 @@
 package com.microservice.phrases.models.services;
 
 import java.util.List;
-import java.util.logging.Logger;
-
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,10 +11,9 @@ import com.microservices.commons.models.entity.phrases.Phrase;
 import com.microservice.phrases.models.services.remote.IUserRemoteCallService;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
+@Slf4j
 @Service
 public class PhraseServiceImpl implements IPhraseService{
-
-	protected Logger LOGGER = Logger.getLogger(PhraseServiceImpl.class.getName());
 	
 	@Autowired
 	private IPhraseDao phraseDao;
@@ -48,7 +46,7 @@ public class PhraseServiceImpl implements IPhraseService{
 	@Override
 	@HystrixCommand(fallbackMethod = "unavailableMessage")
 	public String callUserService() {
-		LOGGER.info("Invoking users service from phrase service");
+		log.info("Invoking users service from phrase service");
 		return loadBalancer.getServiceRoute();
 	}
 

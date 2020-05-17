@@ -9,8 +9,8 @@ import com.microservices.commons.enums.CrudMessagesEnum;
 import com.microservices.commons.enums.DatabaseMessagesEnum;
 import com.microservices.commons.exceptions.DatabaseAccessException;
 import com.microservices.commons.exceptions.NullRecordException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.microservices.commons.utils.Messages;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
@@ -24,17 +24,15 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.microservices.commons.models.entity.phrases.Author;
 import com.microservice.phrases.models.services.IAuthorService;
 
+@Slf4j
 @CrossOrigin(origins = { "http://localhost:4200" })
 @RestController
 public class AuthorController {
-	
-	protected Logger LOGGER = LoggerFactory.getLogger(AuthorController.class);
 	
 	@Autowired
 	private IAuthorService authorService;
@@ -49,17 +47,20 @@ public class AuthorController {
 	
 	@GetMapping(path="/authors/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<?> show(@PathVariable Long id) throws NullRecordException, DatabaseAccessException {
-		
+
 		Author author = null;
 
 		try {
+			log.info(Messages.findObjectMessage("Author", id.toString()));
 			author = authorService.findById(id);
 		} catch (DataAccessException e) {
+			log.error(Messages.errorDatabaseAccessMessage(e.getMessage()));
 			throw new DatabaseAccessException(DatabaseMessagesEnum.ACCESS_DATABASE.getMessage(), e);
 		}
 
 		// return error if the record non exist
 		if (author == null) {
+			log.error(Messages.nullObjectMessage("Author", id.toString()));
 			throw new NullRecordException();
 		}
 
@@ -74,13 +75,16 @@ public class AuthorController {
 
 		// if validation fails, list all errors and return them
 		if(result.hasErrors()) {
+			log.error(Messages.errorsCreatingObjectMessage("Author"));
 			response.put("errors", utilService.listErrors(result));
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.BAD_REQUEST);
 		}
 		
 		try {
+			log.info(Messages.creatingObjectMessage("Author"));
 			newAuthor = authorService.save(author);
 		} catch (DataAccessException e) {
+			log.error(Messages.errorDatabaseCreateMessage("Author", e.toString()));
 			throw new DatabaseAccessException(DatabaseMessagesEnum.STORE_RECORD.getMessage(), e);
 		}
 
@@ -99,19 +103,23 @@ public class AuthorController {
 
 		// if validation fails, list all errors and return them
 		if(result.hasErrors()) {
+			log.error(Messages.errorsUpdatingObjectMessage("Author", id.toString()));
 			response.put("errors", utilService.listErrors(result));
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.BAD_REQUEST);
 		}
 		
 		// return error if the record non exist
 		if (authorFromDB == null) {
+			log.error(Messages.nullObjectMessage("Author", id.toString()));
 			throw new NullRecordException();
 		}
 
 		try {
+			log.info(Messages.updatingObjectMessage("Author", id.toString()));
 			authorFromDB.setName(author.getName());
 			authorUpdated = authorService.save(authorFromDB);
 		} catch (DataAccessException e) {
+			log.error(Messages.errorDatabaseUpdateMessage("Author", id.toString(), e.getMessage()));
 			throw new DatabaseAccessException(DatabaseMessagesEnum.UPDATE_RECORD.getMessage(), e);
 		}
 
@@ -127,8 +135,10 @@ public class AuthorController {
 		Map<String, Object> response = new HashMap<>();
 
 		try {
+			log.info(Messages.deletingObjectMessage("Author", id.toString()));
 			authorService.delete(id);
 		} catch (DataAccessException e) {
+			log.error(Messages.errorDatabaseDeleteMessage("Author", id.toString(), e.getMessage()));
 			throw new DatabaseAccessException(DatabaseMessagesEnum.DELETE_RECORD.getMessage(), e);
 		}
 

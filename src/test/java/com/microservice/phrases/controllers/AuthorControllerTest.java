@@ -97,7 +97,7 @@ public class AuthorControllerTest {
     public void index() throws Exception {
         when(authorService.findAll()).thenReturn(dummyAuthors);
 
-        mockMvc.perform(get("/api/authors")
+        mockMvc.perform(get("/authors")
                 .contentType("application/json"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
@@ -114,7 +114,7 @@ public class AuthorControllerTest {
     public void show_withProperId() throws Exception {
         when(authorService.findById(1L)).thenReturn(author1);
 
-        mockMvc.perform(get("/api/authors/{id}", 1))
+        mockMvc.perform(get("/authors/{id}", 1))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(jsonPath("$.name", is("AUTHOR1")));
@@ -125,14 +125,14 @@ public class AuthorControllerTest {
 
     @Test
     public void show_whenIdIsInvalid() throws Exception {
-        mockMvc.perform(get("/api/authors/{id}", "randomString"))
+        mockMvc.perform(get("/authors/{id}", "randomString"))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
     public void show_whenRecordDoesnotExist() throws Exception {
         when(authorService.findById(anyLong())).thenReturn(null);
-        mockMvc.perform(get("/api/authors/{id}", anyLong()))
+        mockMvc.perform(get("/authors/{id}", anyLong()))
                 .andExpect(status().isNotFound());
 
         verify(authorService, times(1)).findById(anyLong());
@@ -143,7 +143,7 @@ public class AuthorControllerTest {
     public void show_whenDBFailsThenThrowsException() throws Exception {
         when(authorService.findById(1L)).thenThrow(new DataAccessException("..."){});
 
-        mockMvc.perform(get("/api/authors/{id}", 1))
+        mockMvc.perform(get("/authors/{id}", 1))
                 .andExpect(status().isInternalServerError());
 
         verify(authorService, times(1)).findById(1L);
@@ -158,7 +158,7 @@ public class AuthorControllerTest {
     public void create_withProperAuthor() throws Exception {
         when(authorService.save(any(Author.class))).thenReturn(author1);
         
-        mockMvc.perform(post("/api/authors")
+        mockMvc.perform(post("/authors")
                 .content(objectMapper.writeValueAsString(author1))
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated())
@@ -176,7 +176,7 @@ public class AuthorControllerTest {
     public void create_whenAuthorIsEmpty() throws Exception {
         when(utilService.listErrors(any())).thenReturn(emptyAuthorMessages);
 
-        mockMvc.perform(post("/api/authors")
+        mockMvc.perform(post("/authors")
                 .content(objectMapper.writeValueAsString(new Author()))
                 .contentType(MediaType.APPLICATION_JSON))
                 //.andDo(print())
@@ -191,7 +191,7 @@ public class AuthorControllerTest {
     public void create_whenAuthorHasInvalidParams() throws Exception {
         when(utilService.listErrors(any())).thenReturn(invalidParamsMessages);
 
-        mockMvc.perform(post("/api/authors")
+        mockMvc.perform(post("/authors")
                 .content(objectMapper.writeValueAsString(invalidAuthor))
                 .contentType(MediaType.APPLICATION_JSON))
                 //.andDo(print())
@@ -206,7 +206,7 @@ public class AuthorControllerTest {
     public void create_whenDBFailsThenThrowsException() throws Exception {
         when(authorService.save(any(Author.class))).thenThrow(new DataAccessException("..."){});
 
-        mockMvc.perform(post("/api/authors")
+        mockMvc.perform(post("/authors")
                 .content(objectMapper.writeValueAsString(author1))
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isInternalServerError());
@@ -224,7 +224,7 @@ public class AuthorControllerTest {
         when(authorService.findById(anyLong())).thenReturn(author1);
         when(authorService.save(any(Author.class))).thenReturn(author1);
         
-        mockMvc.perform(put("/api/authors/{id}", 1)
+        mockMvc.perform(put("/authors/{id}", 1)
                 .content(objectMapper.writeValueAsString(author1))
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated())
@@ -241,7 +241,7 @@ public class AuthorControllerTest {
 
     @Test
     public void update_whenAuthorIsProper_andInvalidId() throws Exception {
-        mockMvc.perform(put("/api/authors/{id}", "randomString")
+        mockMvc.perform(put("/authors/{id}", "randomString")
                 .content(objectMapper.writeValueAsString(author1))
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
@@ -251,7 +251,7 @@ public class AuthorControllerTest {
     public void update_whenAuthorIsEmpty_AndProperId() throws Exception {
         when(utilService.listErrors(any())).thenReturn(emptyAuthorMessages);
 
-        mockMvc.perform(put("/api/authors/{id}", 1)
+        mockMvc.perform(put("/authors/{id}", 1)
                 .content(objectMapper.writeValueAsString(new Author()))
                 .contentType(MediaType.APPLICATION_JSON))
                 //.andDo(print())
@@ -266,7 +266,7 @@ public class AuthorControllerTest {
     public void update_whenAuthorIsInvalid_AndProperId() throws Exception {
         when(utilService.listErrors(any())).thenReturn(invalidParamsMessages);
 
-        mockMvc.perform(put("/api/authors/{id}", 1)
+        mockMvc.perform(put("/authors/{id}", 1)
                 .content(objectMapper.writeValueAsString(invalidAuthor))
                 .contentType(MediaType.APPLICATION_JSON))
                 //.andDo(print())
@@ -281,7 +281,7 @@ public class AuthorControllerTest {
     public void update_whenAuthorIsNotFound() throws Exception {
         when(authorService.findById(anyLong())).thenReturn(null);
 
-        mockMvc.perform(put("/api/authors/{id}", anyLong())
+        mockMvc.perform(put("/authors/{id}", anyLong())
                 .content(objectMapper.writeValueAsString(author1))
                 .contentType(MediaType.APPLICATION_JSON))
                 //.andDo(print())
@@ -296,7 +296,7 @@ public class AuthorControllerTest {
         when(authorService.save(any(Author.class))).thenThrow(new DataAccessException("..."){});
         when(authorService.findById(anyLong())).thenReturn(author1);
 
-        mockMvc.perform(put("/api/authors/{id}", 1)
+        mockMvc.perform(put("/authors/{id}", 1)
                 .content(objectMapper.writeValueAsString(author1))
                 .contentType(MediaType.APPLICATION_JSON))
                 //.andDo(print())
@@ -315,7 +315,7 @@ public class AuthorControllerTest {
     public void delete_withProperId() throws Exception {
         doNothing().when(authorService).delete(anyLong());
         
-        mockMvc.perform(MockMvcRequestBuilders.delete("/api/authors/{id}", 1))
+        mockMvc.perform(MockMvcRequestBuilders.delete("/authors/{id}", 1))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.msg").exists())
                 .andExpect(jsonPath("$.msg", is(CrudMessagesEnum.DELETED.getMessage())));
@@ -327,7 +327,7 @@ public class AuthorControllerTest {
     @Test
     public void delete_withInvalidId() throws Exception {
 
-        mockMvc.perform(MockMvcRequestBuilders.delete("/api/authors/{id}", "randomString"))
+        mockMvc.perform(MockMvcRequestBuilders.delete("/authors/{id}", "randomString"))
                 .andExpect(status().isBadRequest());
     }
 
@@ -335,7 +335,7 @@ public class AuthorControllerTest {
     public void delete_whenAuthorIsNotFoundThenThrowException() throws Exception {
         doThrow(new DataAccessException("..."){}).when(authorService).delete(anyLong());
 
-        mockMvc.perform(MockMvcRequestBuilders.delete("/api/authors/{id}", anyLong())
+        mockMvc.perform(MockMvcRequestBuilders.delete("/authors/{id}", anyLong())
                 .contentType(MediaType.APPLICATION_JSON))
                 //.andDo(print())
                 .andExpect(status().isInternalServerError());
