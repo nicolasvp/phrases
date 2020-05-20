@@ -96,7 +96,7 @@ public class PhraseController {
 		response.put("msg", CrudMessagesEnum.CREATED.getMessage());
 		response.put("phrase", newPhrase);
 
-		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
+		return new ResponseEntity<>(response, HttpStatus.CREATED);
 	}
 	
 	@PutMapping(path="/phrases/{id}", produces = MediaType.APPLICATION_JSON_VALUE)

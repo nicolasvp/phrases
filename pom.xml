@@ -90,6 +90,10 @@
 			<optional>true</optional>
 		</dependency>
 		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>com.microservices</groupId>
 			<artifactId>commons</artifactId>
 			<version>0.0.1-SNAPSHOT</version>

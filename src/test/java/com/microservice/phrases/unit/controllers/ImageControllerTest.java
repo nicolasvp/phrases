@@ -1,10 +1,11 @@
-package com.microservice.phrases.controllers;
+package com.microservice.phrases.unit.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.microservice.phrases.controllers.ImageController;
+import com.microservice.phrases.models.services.IImageService;
 import com.microservices.commons.enums.CrudMessagesEnum;
 import com.microservices.commons.models.entity.phrases.Image;
 import com.microservices.commons.models.entity.phrases.Type;
-import com.microservice.phrases.models.services.IImageService;
 import com.microservices.commons.models.services.IUtilService;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,9 +29,7 @@ import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 public class ImageControllerTest {
 
