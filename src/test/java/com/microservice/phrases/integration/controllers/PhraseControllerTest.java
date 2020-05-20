@@ -65,7 +65,7 @@ public class PhraseControllerTest {
         this.mockMvc = standaloneSetup(this.phraseController).build();// Standalone context
         phrase1 = new Phrase("phrase1", new Author(1L, "Zig Ziglar", new Date()), new Type(1L, "Inspiradora", new Date()), new Image("Imagen99", new Date()), 0L, new Date());
     }
-/*
+
     @Test
     public void show_PhraseWithProperId() {
         ResponseEntity<Phrase> response = restTemplate.getForEntity("/phrases/1", Phrase.class);
@@ -74,15 +74,13 @@ public class PhraseControllerTest {
         Assert.assertEquals("1", phrase.getId().toString());
         Assert.assertEquals("Si puedes soñarlo, puedes lograrlo", phrase.getBody());
     }
-*/
+
     // Creación de frase utilizando una base de datos en memoria(h2)
     @Test
     public void create_PhraseWithInMemoryDB() {
         ResponseEntity<String> response = restTemplate.postForEntity("/phrases", phrase1, String.class);
-       // Phrase phrase = response.getBody();
-        Assert.assertEquals(HttpStatus.OK, response.getStatusCode());
-        //Assert.assertEquals("1", phrase.getId().toString());
-       // Assert.assertEquals("phrase1", phrase.getBody());
+        Assert.assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        Assert.assertEquals(true, response.getBody().contains("phrase1"));
     }
 /*
     @Test
