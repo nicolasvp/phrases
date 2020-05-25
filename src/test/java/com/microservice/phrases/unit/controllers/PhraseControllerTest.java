@@ -32,6 +32,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
 public class PhraseControllerTest {
 
@@ -94,10 +95,10 @@ public class PhraseControllerTest {
     }
 
     private void setEmptyPhraseMessages() {
-        emptyPhraseMessages.add("The body field can't be empty");
-        emptyPhraseMessages.add("The author field can't be empty");
-        emptyPhraseMessages.add("The type field can't be empty");
-        emptyPhraseMessages.add("The image field can't be empty");
+        emptyPhraseMessages.add("The field body must not be empty");
+        emptyPhraseMessages.add("The field author must not be empty");
+        emptyPhraseMessages.add("The field type must not be empty");
+        emptyPhraseMessages.add("The field image must not be empty");
     }
 
     @Test
@@ -168,7 +169,7 @@ public class PhraseControllerTest {
         mockMvc.perform(post("/phrases")
                 .content(objectMapper.writeValueAsString(phrase1))
                 .contentType(MediaType.APPLICATION_JSON))
-                //  .andDo(print())
+                  .andDo(print())
                 .andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(jsonPath("$.phrase").exists())
@@ -192,10 +193,10 @@ public class PhraseControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(jsonPath("$.errors").exists())
                 .andExpect(jsonPath("$.errors", hasSize(4)))
-                .andExpect(jsonPath("$.errors", hasItem("The body field can't be empty")))
-                .andExpect(jsonPath("$.errors", hasItem("The author field can't be empty")))
-                .andExpect(jsonPath("$.errors", hasItem("The type field can't be empty")))
-                .andExpect(jsonPath("$.errors", hasItem("The image field can't be empty")));
+                .andExpect(jsonPath("$.errors", hasItem(emptyPhraseMessages.get(0))))
+                .andExpect(jsonPath("$.errors", hasItem(emptyPhraseMessages.get(1))))
+                .andExpect(jsonPath("$.errors", hasItem(emptyPhraseMessages.get(2))))
+                .andExpect(jsonPath("$.errors", hasItem(emptyPhraseMessages.get(3))));
     }
 
     @Test
@@ -263,17 +264,17 @@ public class PhraseControllerTest {
         when(utilService.listErrors(any())).thenReturn(emptyPhraseMessages);
 
         mockMvc.perform(put("/phrases/{id}", 1)
-                .content(objectMapper.writeValueAsString(new Type()))
+                .content(objectMapper.writeValueAsString(new Phrase()))
                 .contentType(MediaType.APPLICATION_JSON))
                 //.andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(jsonPath("$.errors").exists())
                 .andExpect(jsonPath("$.errors", hasSize(4)))
-                .andExpect(jsonPath("$.errors", hasItem("The body field can't be empty")))
-                .andExpect(jsonPath("$.errors", hasItem("The author field can't be empty")))
-                .andExpect(jsonPath("$.errors", hasItem("The type field can't be empty")))
-                .andExpect(jsonPath("$.errors", hasItem("The image field can't be empty")));
+                .andExpect(jsonPath("$.errors", hasItem(emptyPhraseMessages.get(0))))
+                .andExpect(jsonPath("$.errors", hasItem(emptyPhraseMessages.get(1))))
+                .andExpect(jsonPath("$.errors", hasItem(emptyPhraseMessages.get(2))))
+                .andExpect(jsonPath("$.errors", hasItem(emptyPhraseMessages.get(3))));
     }
 
     @Test

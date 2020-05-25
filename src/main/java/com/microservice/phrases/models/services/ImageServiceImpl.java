@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.microservice.phrases.models.dao.IImageDao;
 import com.microservices.commons.models.entity.phrases.Image;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ImageServiceImpl implements IImageService {
@@ -15,11 +16,13 @@ public class ImageServiceImpl implements IImageService {
 	private IImageDao imageDao;
 	
 	@Override
+	@Transactional(readOnly = true)
 	public List<Image> findAll() {
 		return (List<Image>) imageDao.findAll();
 	}
 
 	@Override
+	@Transactional(readOnly = true)
 	public Image findById(Long id) {
 		return imageDao.findById(id).orElse(null);
 	}
