@@ -11,9 +11,15 @@ pipeline {
                 sh "mvn -version"
                 sh "mvn clean compile"
             }
-        }
+        },
+        stage("Testing") {
+            steps {
+                sh "mvn test -DconfigUrl=http://config-server:1111 -Dspring.profiles.active=test"
+            }
+        }        
     }
-
+// To-do:
+// Add test stage using a job with config server in jenkins
     post {
         always {
             cleanWs()
