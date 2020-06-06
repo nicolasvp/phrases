@@ -14,7 +14,7 @@ pipeline {
         }
         stage("Testing") {
             steps {
-                sh "mvn test -DconfigUrl=http://config-server:1111 -Dspring.profiles.active=test"
+                sh "mvn test -DconfigUrl=http://config-server:1111 -Dspring.profiles.active=jenkins"
             }
         }        
     }
